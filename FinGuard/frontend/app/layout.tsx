@@ -1,16 +1,30 @@
 import type { Metadata } from "next";
-import { Inter, Geist } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/Providers";
-import { cn } from "@/lib/utils";
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+});
 
-const inter = Inter({ subsets: ["latin"] });
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
-  title: "FinGuard - Smart Personal Finance & Pattern Monitor",
-  description: "An elite personal finance and transaction monitoring platform.",
+  title: "FinGuard AI — Intelligent Personal Finance & Fraud Intelligence",
+  description: "Enterprise-grade fraud detection, AI-powered insights, and beautiful analytics — built for people who take their finances seriously.",
+  keywords: ["personal finance", "fraud detection", "budget planner", "AI insights", "expense tracking"],
+  openGraph: {
+    title: "FinGuard AI",
+    description: "Intelligent Personal Finance & Fraud Intelligence Platform",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
@@ -19,11 +33,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={cn("dark", "font-sans", geist.variable)}>
-      <body className={`${inter.className} bg-slate-950 text-slate-50 min-h-screen antialiased`}>
-        <Providers>
-          {children}
-        </Providers>
+    <html lang="en" className={`dark ${inter.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
+      <head>
+        <link rel="icon" href="/favicon.ico" />
+        <meta name="theme-color" content="#10b981" />
+      </head>
+      <body className="min-h-screen bg-background text-foreground antialiased font-sans" suppressHydrationWarning>
+        <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || 'mock-client-id'}>
+          <Providers>
+            {children}
+          </Providers>
+        </GoogleOAuthProvider>
       </body>
     </html>
   );
