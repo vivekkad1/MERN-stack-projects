@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Search, ShoppingCart, User, Menu, Moon, Sun, MapPin } from 'lucide-react';
+import { Search, ShoppingCart, User, Menu, Moon, Sun, MapPin, ChevronDown } from 'lucide-react';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useCart } from '@/context/CartContext';
@@ -67,16 +67,16 @@ export function Navbar() {
             </Button>
             <Link href="/" className="flex items-center gap-2">
               <span className="text-xl sm:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-600">
-                CommerceHub
+                Minikart
               </span>
             </Link>
             
-            <div className="hidden md:flex items-center ml-6 cursor-pointer text-sm text-muted-foreground hover:text-primary transition-colors" onClick={fetchLocation}>
+            <div className="hidden md:flex items-center ml-6 cursor-pointer text-sm text-muted-foreground hover:text-primary transition-colors w-[140px]" onClick={fetchLocation}>
               <MapPin className="h-4 w-4 mr-1 text-primary shrink-0" />
-              <div className="flex flex-col text-left leading-tight">
+              <div className="flex flex-col text-left leading-tight w-full">
                 <span className="text-[10px] opacity-70">Deliver to</span>
-                <span className="font-semibold text-xs truncate max-w-[120px]">{location.city}</span>
-                {location.pincode && <span className="font-bold text-[10px] text-primary">{location.pincode}</span>}
+                <span className="font-semibold text-xs truncate w-[110px]">{location.city}</span>
+                {location.pincode && <span className="font-bold text-[10px] text-primary truncate w-[110px]">{location.pincode}</span>}
               </div>
             </div>
           </div>
@@ -95,26 +95,16 @@ export function Navbar() {
                 placeholder="Search products, brands and categories..."
               />
             </form>
-            <nav className="ml-8 flex items-center gap-6 text-sm font-medium">
-              <Link href="/categories" className="transition-colors hover:text-primary">Categories</Link>
-              <Link href="/deals" className="transition-colors hover:text-primary">Deals</Link>
-              <Link href="/new" className="transition-colors hover:text-primary">New Arrivals</Link>
-            </nav>
+
           </div>
 
           {/* Right Icons */}
-          <div className="flex items-center gap-2">
-            <Link href="/cart" className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "relative")}>
-              <ShoppingCart className="h-5 w-5" />
-              {cartCount > 0 && (
-                <span className="absolute top-0 right-0 h-4 w-4 rounded-full bg-primary text-[10px] font-bold flex items-center justify-center text-primary-foreground">
-                  {cartCount}
-                </span>
-              )}
-            </Link>
+          <div className="flex items-center gap-2 md:gap-4">
             <DropdownMenu>
-              <DropdownMenuTrigger className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "rounded-full outline-none")}>
+              <DropdownMenuTrigger className={cn(buttonVariants({ variant: "ghost" }), "outline-none gap-2 px-2")} suppressHydrationWarning>
                 <User className="h-5 w-5" />
+                <span className="font-medium hidden sm:inline-block">Vivek</span>
+                <ChevronDown className="h-4 w-4 text-muted-foreground hidden sm:inline-block" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuGroup>
@@ -143,6 +133,16 @@ export function Navbar() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+
+            <Link href="/cart" className={cn(buttonVariants({ variant: "ghost" }), "gap-2 px-2 relative")}>
+              <ShoppingCart className="h-5 w-5" />
+              <span className="font-medium hidden sm:inline-block">Cart</span>
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 sm:top-0 sm:right-0 h-4 w-4 rounded-full bg-primary text-[10px] font-bold flex items-center justify-center text-primary-foreground">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
           </div>
 
         </div>
@@ -163,11 +163,7 @@ export function Navbar() {
               placeholder="Search products..."
             />
           </form>
-          <nav className="flex flex-col gap-4 text-sm font-medium">
-            <Link href="/categories" onClick={() => setIsMobileMenuOpen(false)} className="transition-colors hover:text-primary">Categories</Link>
-            <Link href="/deals" onClick={() => setIsMobileMenuOpen(false)} className="transition-colors hover:text-primary">Deals</Link>
-            <Link href="/new" onClick={() => setIsMobileMenuOpen(false)} className="transition-colors hover:text-primary">New Arrivals</Link>
-          </nav>
+
           <div className="pt-2 border-t flex items-center cursor-pointer text-sm text-muted-foreground hover:text-primary transition-colors" onClick={fetchLocation}>
             <MapPin className="h-4 w-4 mr-2 text-primary shrink-0" />
             <div className="flex flex-col text-left leading-tight">

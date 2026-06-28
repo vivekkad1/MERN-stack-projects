@@ -11,7 +11,7 @@ import { useCart } from "@/context/CartContext";
 // In a real app, this would be fetched from the backend based on params.id
 const productData = {
   id: "1",
-  title: "Premium Wireless Noise-Cancelling Headphones",
+  title: "Wireless Noise-Cancelling Headphones",
   price: 24999,
   originalPrice: 29999,
   rating: 4.8,

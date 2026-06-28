@@ -9,7 +9,7 @@ export default function RegisterPage() {
       <div className="w-full max-w-md bg-card rounded-2xl border p-8 shadow-sm">
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold tracking-tight">Create an account</h1>
-          <p className="text-muted-foreground mt-2 text-sm">Join CommerceHub to start shopping and selling</p>
+          <p className="text-muted-foreground mt-2 text-sm">Join Minikart to start shopping and selling</p>
         </div>
 
         <form className="flex flex-col gap-5" onSubmit={(e) => { e.preventDefault(); alert("Registration coming soon!"); }}>

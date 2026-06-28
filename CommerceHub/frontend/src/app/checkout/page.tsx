@@ -217,7 +217,7 @@ export default function CheckoutPage() {
             </div>
             <h2 className="text-3xl font-bold mb-4">Order Placed Successfully!</h2>
             <p className="text-muted-foreground text-lg mb-8 max-w-md mx-auto">
-              Thank you for shopping with CommerceHub. We've received your order and will process it shortly.
+              Thank you for shopping with Minikart. We've received your order and will process it shortly.
             </p>
             <div className="flex justify-center gap-4">
               <Button variant="outline" onClick={() => router.push('/profile')}>View Orders</Button>

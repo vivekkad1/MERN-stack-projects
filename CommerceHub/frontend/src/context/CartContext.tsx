@@ -28,7 +28,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export function CartProvider({ children }: { children: ReactNode }) {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
-  const isAuthenticated = typeof window !== 'undefined' && localStorage.getItem('commercehub_user');
+  const isAuthenticated = typeof window !== 'undefined' && localStorage.getItem('minikart_user');
 
   const fetchCartFromBackend = useCallback(async () => {
     try {
@@ -55,7 +55,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     if (isAuthenticated) {
       fetchCartFromBackend().finally(() => setIsLoaded(true));
     } else {
-      const savedCart = localStorage.getItem("commercehub_cart");
+      const savedCart = localStorage.getItem("minikart_cart");
       if (savedCart) {
         try {
           setCartItems(JSON.parse(savedCart));
@@ -70,7 +70,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // Save to local storage on change if not authenticated
   useEffect(() => {
     if (isLoaded && !isAuthenticated) {
-      localStorage.setItem("commercehub_cart", JSON.stringify(cartItems));
+      localStorage.setItem("minikart_cart", JSON.stringify(cartItems));
     }
   }, [cartItems, isLoaded, isAuthenticated]);
 

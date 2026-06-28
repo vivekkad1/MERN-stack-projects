@@ -14,7 +14,7 @@ export default function Home() {
   const trendingProducts = [
     { id: 1, title: 'boAt Airdopes 141', desc: 'True Wireless Earbuds with 42H Playtime.', price: '₹1,299', rating: 4.2, label: 'Bestseller' },
     { id: 2, title: 'OnePlus Nord CE 3 Lite', desc: 'Pastel Lime, 8GB RAM, 128GB Storage, 108MP Camera.', price: '₹19,999', rating: 4.8, label: 'Trending' },
-    { id: 3, title: 'Kanjivaram Silk Saree', desc: 'Authentic pure silk saree with zari border for festive wear.', price: '₹4,599', rating: 4.7, label: 'Premium' },
+    { id: 3, title: 'Kanjivaram Silk Saree', desc: 'Authentic pure silk saree with zari border for festive wear.', price: '₹4,599', rating: 4.7, label: 'Top Rated' },
     { id: 4, title: 'Pigeon Handy Mini Chopper', desc: 'Plastic Chopper with 3 Blades for daily kitchen use, Green.', price: '₹249', rating: 4.5, label: 'Deal' }
   ];
 
@@ -22,7 +22,7 @@ export default function Home() {
     <div className="flex flex-col gap-16 pb-16">
       
       {/* Hero Section */}
-      <section className="relative w-full min-h-[calc(100vh-64px)] flex items-center justify-center overflow-hidden">
+      <section className="relative w-full min-h-[calc(100vh-144px)] flex items-center justify-center overflow-hidden">
         {/* Background gradient/image placeholder */}
         <div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-900 dark:to-indigo-950 -z-10" />
         
@@ -32,7 +32,7 @@ export default function Home() {
               Big Indian Festival Sale is Here!
             </div>
             <h1 className="text-3xl sm:text-4xl md:text-6xl font-extrabold tracking-tight leading-tight">
-              India's Premium <br className="hidden sm:block" />
+              India's Favorite <br className="hidden sm:block" />
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-600">
                 Shopping Destination
               </span>
@@ -44,7 +44,7 @@ export default function Home() {
               <Link href="/categories" className={cn(buttonVariants({ size: "lg" }), "gap-2")}>
                 Start Shopping <ArrowRight className="h-4 w-4" />
               </Link>
-              <Link href="/sell" className={buttonVariants({ size: "lg", variant: "outline" })}>
+              <Link href="/seller" className={buttonVariants({ size: "lg", variant: "outline" })}>
                 Sell Across India
               </Link>
             </div>

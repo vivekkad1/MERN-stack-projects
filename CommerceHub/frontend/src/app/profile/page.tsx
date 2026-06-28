@@ -200,7 +200,7 @@ function ProfileContent() {
             {/* Appearance Section */}
             <div className="space-y-4">
               <h3 className="text-xl font-semibold">Appearance</h3>
-              <p className="text-sm text-muted-foreground mb-4">Choose how CommerceHub looks to you.</p>
+              <p className="text-sm text-muted-foreground mb-4">Choose how Minikart looks to you.</p>
               
               {mounted ? (
                 <div className="flex items-center gap-4">

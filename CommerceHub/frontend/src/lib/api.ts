@@ -9,7 +9,7 @@ const api = axios.create({
 api.interceptors.request.use((config) => {
   // Try to get token from localStorage (assuming we store it there upon login)
   if (typeof window !== 'undefined') {
-    const userInfo = localStorage.getItem('commercehub_user');
+    const userInfo = localStorage.getItem('minikart_user');
     if (userInfo) {
       try {
         const { token } = JSON.parse(userInfo);

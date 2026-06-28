@@ -7,10 +7,10 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="space-y-4">
             <h3 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-600">
-              CommerceHub
+              Minikart
             </h3>
             <p className="text-sm text-muted-foreground">
-              Your premium destination for the best products across the globe. Built for a seamless shopping experience.
+              Your ultimate destination for the best products across the globe. Built for a seamless shopping experience.
             </p>
           </div>
           <div>
@@ -34,14 +34,14 @@ export function Footer() {
           <div>
             <h4 className="font-semibold mb-4">Business</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link href="/seller" className="hover:text-primary transition-colors">Sell on CommerceHub</Link></li>
+              <li><Link href="/seller" className="hover:text-primary transition-colors">Sell on Minikart</Link></li>
               <li><Link href="/affiliate" className="hover:text-primary transition-colors">Affiliate Program</Link></li>
               <li><Link href="/advertise" className="hover:text-primary transition-colors">Advertise with Us</Link></li>
             </ul>
           </div>
         </div>
         <div className="mt-12 pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} CommerceHub. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Minikart. All rights reserved.</p>
           <div className="flex gap-4 mt-4 md:mt-0">
             <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link>
             <Link href="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link>
