@@ -6,6 +6,9 @@ import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 
 import authRoutes from './routes/auth.routes';
+import cartRoutes from './routes/cart.routes';
+import orderRoutes from './routes/order.routes';
+import addressRoutes from './routes/address.routes';
 
 dotenv.config();
 
@@ -24,6 +27,9 @@ app.use(morgan('dev'));
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/cart', cartRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/addresses', addressRoutes);
 
 // Basic health check route
 app.get('/health', (req, res) => {
@@ -42,3 +48,7 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 });
 
 export default app;
+
+// Trigger restart
+// Restarting again to apply order mock fix
+// Trigger restart for logging

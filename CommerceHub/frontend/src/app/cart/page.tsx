@@ -2,10 +2,12 @@
 
 import { useCart } from "@/context/CartContext";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Trash2, Minus, Plus, ShoppingCart, ArrowRight } from "lucide-react";
 
 export default function CartPage() {
+  const router = useRouter();
   const { cartItems, incrementQuantity, decrementQuantity, removeFromCart, cartTotal } = useCart();
 
   const deliveryFee = cartTotal > 500 || cartTotal === 0 ? 0 : 50;
@@ -71,7 +73,7 @@ export default function CartPage() {
                 <span className="font-bold text-2xl text-primary">₹{total.toLocaleString('en-IN')}</span>
               </div>
             </div>
-            <Button className="w-full gap-2" size="lg" onClick={() => alert("Proceed to checkout!")}>
+            <Button className="w-full gap-2" size="lg" onClick={() => router.push('/checkout')} disabled={cartItems.length === 0}>
               Proceed to Checkout <ArrowRight className="h-4 w-4" />
             </Button>
             <div className="mt-4 text-center">

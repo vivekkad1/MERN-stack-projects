@@ -1,19 +1,40 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { User, Package, Settings, CreditCard, LogOut, Heart, Moon, Sun, Monitor } from "lucide-react";
+import { User, Package, Settings, CreditCard, LogOut, Heart, Moon, Sun, Monitor, Loader2, Calendar, MapPin } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
+import api from "@/lib/api";
 
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState("account");
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const [orders, setOrders] = useState<any[]>([]);
+  const [loadingOrders, setLoadingOrders] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const fetchOrders = async () => {
+    setLoadingOrders(true);
+    try {
+      const res = await api.get('/orders/myorders');
+      setOrders(res.data);
+    } catch (err) {
+      console.error('Failed to fetch orders:', err);
+    } finally {
+      setLoadingOrders(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'orders') {
+      fetchOrders();
+    }
+  }, [activeTab]);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -73,11 +94,63 @@ export default function ProfilePage() {
         );
       case "orders":
         return (
-          <div className="flex flex-col items-center justify-center py-16 text-center border-2 border-dashed rounded-xl">
-            <Package className="h-16 w-16 text-muted-foreground mb-4 opacity-50" />
-            <h3 className="text-xl font-semibold mb-2">No orders yet</h3>
-            <p className="text-muted-foreground mb-6 max-w-sm">When you place orders, they will appear here so you can track them.</p>
-            <Button onClick={() => window.location.href = "/"}>Start Shopping</Button>
+          <div className="space-y-6">
+            {loadingOrders ? (
+              <div className="flex justify-center py-16">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              </div>
+            ) : orders.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 text-center border-2 border-dashed rounded-xl">
+                <Package className="h-16 w-16 text-muted-foreground mb-4 opacity-50" />
+                <h3 className="text-xl font-semibold mb-2">No orders yet</h3>
+                <p className="text-muted-foreground mb-6 max-w-sm">When you place orders, they will appear here so you can track them.</p>
+                <Button onClick={() => window.location.href = "/"}>Start Shopping</Button>
+              </div>
+            ) : (
+              orders.map((order, index) => (
+                <div key={order._id} className="border rounded-xl p-6 bg-card flex flex-col gap-4">
+                  <div className="flex justify-between items-start border-b pb-4">
+                    <div>
+                      <h4 className="font-semibold text-lg">Order #{order._id.substring(order._id.length - 8).toUpperCase()}</h4>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                        <Calendar className="w-4 h-4" />
+                        {new Date(order.createdAt).toLocaleDateString()}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className={`px-3 py-1 rounded-full text-xs font-medium inline-block
+                        ${order.status === 'Delivered' ? 'bg-green-100 text-green-700' : 
+                          order.status === 'Cancelled' ? 'bg-red-100 text-red-700' : 
+                          'bg-blue-100 text-blue-700'}`}>
+                        {order.status}
+                      </div>
+                      <p className="font-bold text-lg mt-2 text-primary">₹{order.totalPrice.toLocaleString('en-IN')}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-4 items-center">
+                    <MapPin className="w-5 h-5 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">{order.shippingAddress.city}, {order.shippingAddress.country}</p>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-2">
+                     {order.orderItems.map((item: any) => (
+                       <div key={item._id} className="flex gap-3 items-center border rounded-lg p-2 bg-muted/20">
+                          <div className="w-12 h-12 bg-muted rounded-md flex items-center justify-center text-xs font-bold shrink-0 overflow-hidden">
+                             {item.product?.images?.[0] ? (
+                               <img src={item.product.images[0]} alt={item.product.name} className="w-full h-full object-cover" />
+                             ) : 'IMG'}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">{item.product?.name || 'Product'}</p>
+                            <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
+                          </div>
+                       </div>
+                     ))}
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         );
       case "wishlist":
