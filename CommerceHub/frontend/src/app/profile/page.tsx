@@ -1,18 +1,35 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { User, Package, Settings, CreditCard, LogOut, Heart, Moon, Sun, Monitor, Loader2, Calendar, MapPin } from "lucide-react";
 import { useTheme } from "next-themes";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import api from "@/lib/api";
 
-export default function ProfilePage() {
-  const [activeTab, setActiveTab] = useState("account");
+function ProfileContent() {
+  const searchParams = useSearchParams();
+  
+  const [activeTab, setActiveTab] = useState(searchParams.get("tab") || "account");
   const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [profileData, setProfileData] = useState({
+    name: "Vivek Sharma",
+    email: "vivek@example.com",
+    phone: "+91 98765 43210"
+  });
+  const [tempProfileData, setTempProfileData] = useState({ ...profileData });
+  
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [orders, setOrders] = useState<any[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
+
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     setMounted(true);
@@ -44,10 +61,10 @@ export default function ProfilePage() {
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-muted-foreground">Full Name</label>
               {isEditingProfile ? (
-                <input type="text" defaultValue="Vivek Sharma" className="flex h-12 w-full rounded-md border border-input bg-background px-4 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2" />
+                <input type="text" value={tempProfileData.name} onChange={(e) => setTempProfileData({...tempProfileData, name: e.target.value})} className="flex h-12 w-full rounded-md border border-input bg-background px-4 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2" />
               ) : (
                 <div className="h-12 px-4 rounded-md border bg-background flex items-center">
-                  Vivek Sharma
+                  {profileData.name}
                 </div>
               )}
             </div>
@@ -55,10 +72,10 @@ export default function ProfilePage() {
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-muted-foreground">Email Address</label>
               {isEditingProfile ? (
-                <input type="email" defaultValue="vivek@example.com" className="flex h-12 w-full rounded-md border border-input bg-background px-4 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2" />
+                <input type="email" value={tempProfileData.email} onChange={(e) => setTempProfileData({...tempProfileData, email: e.target.value})} className="flex h-12 w-full rounded-md border border-input bg-background px-4 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2" />
               ) : (
                 <div className="h-12 px-4 rounded-md border bg-background flex items-center">
-                  vivek@example.com
+                  {profileData.email}
                 </div>
               )}
             </div>
@@ -66,10 +83,10 @@ export default function ProfilePage() {
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-muted-foreground">Phone Number</label>
               {isEditingProfile ? (
-                <input type="tel" defaultValue="+91 98765 43210" className="flex h-12 w-full rounded-md border border-input bg-background px-4 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2" />
+                <input type="tel" value={tempProfileData.phone} onChange={(e) => setTempProfileData({...tempProfileData, phone: e.target.value})} className="flex h-12 w-full rounded-md border border-input bg-background px-4 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2" />
               ) : (
                 <div className="h-12 px-4 rounded-md border bg-background flex items-center">
-                  +91 98765 43210
+                  {profileData.phone}
                 </div>
               )}
             </div>
@@ -77,10 +94,16 @@ export default function ProfilePage() {
             <div className="pt-6 flex gap-3">
               {isEditingProfile ? (
                 <>
-                  <Button size="lg" onClick={() => { setIsEditingProfile(false); alert("Profile updated successfully!"); }}>
+                  <Button size="lg" onClick={() => { 
+                    setProfileData(tempProfileData); 
+                    setIsEditingProfile(false); 
+                  }}>
                     Save Changes
                   </Button>
-                  <Button size="lg" variant="outline" onClick={() => setIsEditingProfile(false)}>
+                  <Button size="lg" variant="outline" onClick={() => {
+                    setTempProfileData(profileData);
+                    setIsEditingProfile(false);
+                  }}>
                     Cancel
                   </Button>
                 </>
@@ -111,8 +134,8 @@ export default function ProfilePage() {
                 <div key={order._id} className="border rounded-xl p-6 bg-card flex flex-col gap-4">
                   <div className="flex justify-between items-start border-b pb-4">
                     <div>
-                      <h4 className="font-semibold text-lg">Order #{order._id.substring(order._id.length - 8).toUpperCase()}</h4>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                      <h4 className="font-semibold text-base md:text-lg">Order #{order._id.substring(order._id.length - 8).toUpperCase()}</h4>
+                      <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground mt-1">
                         <Calendar className="w-4 h-4" />
                         {new Date(order.createdAt).toLocaleDateString()}
                       </div>
@@ -133,17 +156,17 @@ export default function ProfilePage() {
                     <p className="text-sm text-muted-foreground">{order.shippingAddress.city}, {order.shippingAddress.country}</p>
                   </div>
                   
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-2">
+                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-2">
                      {order.orderItems.map((item: any) => (
                        <div key={item._id} className="flex gap-3 items-center border rounded-lg p-2 bg-muted/20">
-                          <div className="w-12 h-12 bg-muted rounded-md flex items-center justify-center text-xs font-bold shrink-0 overflow-hidden">
+                          <div className="w-10 h-10 md:w-12 md:h-12 bg-muted rounded-md flex items-center justify-center text-xs font-bold shrink-0 overflow-hidden">
                              {item.product?.images?.[0] ? (
                                <img src={item.product.images[0]} alt={item.product.name} className="w-full h-full object-cover" />
                              ) : 'IMG'}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium truncate">{item.product?.name || 'Product'}</p>
-                            <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
+                            <p className="text-xs md:text-sm font-medium truncate">{item.product?.name || 'Product'}</p>
+                            <p className="text-[10px] md:text-xs text-muted-foreground">Qty: {item.quantity}</p>
                           </div>
                        </div>
                      ))}
@@ -297,9 +320,9 @@ export default function ProfilePage() {
 
   return (
     <div className="container mx-auto px-4 md:px-6 py-12 min-h-screen">
-      <div className="flex items-center gap-3 mb-8">
-        <User className="h-8 w-8 text-primary" />
-        <h1 className="text-3xl md:text-4xl font-bold tracking-tight">My Profile</h1>
+      <div className="flex items-center gap-3 mb-6 md:mb-8">
+        <User className="h-6 w-6 md:h-8 md:w-8 text-primary" />
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">My Profile</h1>
       </div>
 
       <div className="flex flex-col md:flex-row gap-8">
@@ -355,4 +378,12 @@ export default function ProfilePage() {
       </div>
     </div>
   );
+}
+
+export default function ProfilePage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><Loader2 className="h-8 w-8 animate-spin" /></div>}>
+      <ProfileContent />
+    </Suspense>
+  )
 }

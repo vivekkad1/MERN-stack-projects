@@ -7,12 +7,22 @@ import { Search, ShoppingCart, User, Menu, Moon, Sun, MapPin } from 'lucide-reac
 import { Button, buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useCart } from '@/context/CartContext';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuGroup,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function Navbar() {
   const { cartCount } = useCart();
   const router = useRouter();
   const [location, setLocation] = useState({ city: "Select Location", pincode: "" });
   const [searchQuery, setSearchQuery] = useState("");
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,11 +62,11 @@ export function Navbar() {
           
           {/* Mobile Menu & Logo */}
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" className="md:hidden" onClick={() => alert('Mobile menu opened')}>
+            <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
               <Menu className="h-5 w-5" />
             </Button>
             <Link href="/" className="flex items-center gap-2">
-              <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-600">
+              <span className="text-xl sm:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-600">
                 CommerceHub
               </span>
             </Link>
@@ -102,13 +112,71 @@ export function Navbar() {
                 </span>
               )}
             </Link>
-            <Link href="/profile" className={buttonVariants({ variant: "ghost", size: "icon" })}>
-              <User className="h-5 w-5" />
-            </Link>
+            <DropdownMenu>
+              <DropdownMenuTrigger className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "rounded-full outline-none")}>
+                <User className="h-5 w-5" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => router.push('/profile?tab=account')}>
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Profile</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => router.push('/profile?tab=orders')}>
+                    <ShoppingCart className="mr-2 h-4 w-4" />
+                    <span>Orders</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => router.push('/profile?tab=wishlist')}>
+                    <Moon className="mr-2 h-4 w-4" />
+                    <span>Wishlist</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => router.push('/profile?tab=settings')}>
+                    <Sun className="mr-2 h-4 w-4" />
+                    <span>Settings</span>
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="text-destructive" onClick={() => alert('Sign Out coming soon!')}>
+                  Log out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
         </div>
       </div>
+
+      {/* Mobile Menu Dropdown */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden border-t bg-background px-4 py-4 space-y-4 shadow-lg absolute w-full left-0 top-16 z-40">
+          <form onSubmit={(e) => { handleSearch(e); setIsMobileMenuOpen(false); }} className="w-full relative group">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+            </div>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="block w-full pl-10 pr-3 py-2 border border-input rounded-full leading-5 bg-background focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary sm:text-sm transition-all"
+              placeholder="Search products..."
+            />
+          </form>
+          <nav className="flex flex-col gap-4 text-sm font-medium">
+            <Link href="/categories" onClick={() => setIsMobileMenuOpen(false)} className="transition-colors hover:text-primary">Categories</Link>
+            <Link href="/deals" onClick={() => setIsMobileMenuOpen(false)} className="transition-colors hover:text-primary">Deals</Link>
+            <Link href="/new" onClick={() => setIsMobileMenuOpen(false)} className="transition-colors hover:text-primary">New Arrivals</Link>
+          </nav>
+          <div className="pt-2 border-t flex items-center cursor-pointer text-sm text-muted-foreground hover:text-primary transition-colors" onClick={fetchLocation}>
+            <MapPin className="h-4 w-4 mr-2 text-primary shrink-0" />
+            <div className="flex flex-col text-left leading-tight">
+              <span className="text-[10px] opacity-70">Deliver to</span>
+              <span className="font-semibold text-xs truncate max-w-[200px]">{location.city}</span>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
