@@ -35,6 +35,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       const res = await api.get('/cart');
       const backendCart = res.data;
       if (backendCart && backendCart.items) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const items: CartItem[] = backendCart.items.map((i: any) => ({
           id: i.product._id || i.product, // fallback if not populated
           product: i.product._id || i.product,
@@ -53,13 +54,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // Load cart on mount
   useEffect(() => {
     if (isAuthenticated) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchCartFromBackend().finally(() => setIsLoaded(true));
     } else {
       const savedCart = localStorage.getItem("minikart_cart");
       if (savedCart) {
         try {
           setCartItems(JSON.parse(savedCart));
-        } catch (e) {
+        } catch {
           console.error("Failed to parse cart from local storage");
         }
       }

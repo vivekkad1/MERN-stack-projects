@@ -13,7 +13,9 @@ import productRoutes from './routes/product.routes';
 import categoryRoutes from './routes/category.routes';
 import brandRoutes from './routes/brand.routes';
 import reviewRoutes from './routes/review.routes';
+import wishlistRoutes from './routes/wishlist.routes';
 import paymentRoutes from './routes/payment.routes';
+import historyRoutes from './routes/history.routes';
 
 dotenv.config();
 
@@ -42,6 +44,8 @@ app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/brands', brandRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/wishlist', wishlistRoutes);
+app.use('/api/history', historyRoutes);
 app.use('/api/payments', paymentRoutes);
 
 // Basic health check route

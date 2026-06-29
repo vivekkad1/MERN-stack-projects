@@ -1,6 +1,6 @@
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Star, Filter, ArrowUpDown } from "lucide-react";
-import Image from "next/image";
 
 export default async function CategoryPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -12,9 +12,9 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
   const products = Array.from({ length: 8 }).map((_, i) => ({
     id: i + 1,
     title: `${title} Product ${i + 1}`,
-    price: `₹${(Math.random() * 5000 + 500).toFixed(0)}`,
-    rating: (Math.random() * 1 + 4).toFixed(1),
-    reviews: Math.floor(Math.random() * 500 + 50),
+    price: `₹${(5000 + i * 500).toFixed(0)}`,
+    rating: (4 + (i % 5) * 0.2).toFixed(1),
+    reviews: 50 + i * 15,
   }));
 
   const subcategoryMap: Record<string, { name: string; color: string; isSpecial?: boolean }[]> = {
@@ -244,11 +244,13 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {products.map((product) => (
             <div key={product.id} className="group relative flex flex-col rounded-xl border bg-card text-card-foreground shadow-sm overflow-hidden hover:shadow-lg transition-all">
-              <div className="aspect-square bg-muted/40 relative overflow-hidden flex items-center justify-center p-4">
+              <Link href={`/product/${product.id}`} className="aspect-square bg-muted/40 relative overflow-hidden flex items-center justify-center p-4">
                 <div className="w-full h-full rounded-md bg-muted animate-pulse" />
-              </div>
+              </Link>
               <div className="p-4 flex flex-col gap-2 flex-1">
-                <h3 className="font-semibold line-clamp-2">{product.title}</h3>
+                <Link href={`/product/${product.id}`} className="before:absolute before:inset-0">
+                  <h3 className="font-semibold line-clamp-2">{product.title}</h3>
+                </Link>
                 
                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
                   <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
@@ -258,7 +260,9 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
                 
                 <div className="mt-auto pt-3 flex items-center justify-between">
                   <span className="text-lg font-bold">{product.price}</span>
-                  <Button size="sm" variant="secondary">Add</Button>
+                  <div className="relative z-10">
+                    <Button size="sm" variant="secondary">Add</Button>
+                  </div>
                 </div>
               </div>
             </div>

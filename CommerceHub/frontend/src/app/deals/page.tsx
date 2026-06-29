@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Star, Clock } from "lucide-react";
-import Image from "next/image";
+
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 
@@ -38,7 +38,7 @@ export default function DealsPage() {
             </div>
             
             <div className="aspect-[4/3] bg-muted/30 relative overflow-hidden flex items-center justify-center p-6">
-               <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10" />
+               <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none" />
                <div className="w-full h-full rounded-xl bg-muted animate-pulse" />
             </div>
             

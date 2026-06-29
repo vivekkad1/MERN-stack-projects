@@ -65,7 +65,7 @@ export default function CategoriesPage() {
 
       <div className="mt-12 p-8 rounded-3xl bg-secondary text-secondary-foreground flex flex-col md:flex-row items-center justify-between gap-6">
         <div>
-          <h3 className="text-2xl font-bold">Can't find what you're looking for?</h3>
+          <h3 className="text-2xl font-bold">Can&apos;t find what you&apos;re looking for?</h3>
           <p className="opacity-80 mt-2">Try searching our entire catalog of millions of products.</p>
         </div>
         <div className="w-full md:w-auto flex-1 max-w-md">

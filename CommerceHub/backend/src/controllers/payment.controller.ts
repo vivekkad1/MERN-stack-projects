@@ -3,7 +3,7 @@ import Stripe from 'stripe';
 import { Order } from '../models/Order';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_mock', {
-  apiVersion: '2025-01-27.acacia',
+  apiVersion: '2026-06-24.dahlia',
 });
 
 // @desc    Create a PaymentIntent

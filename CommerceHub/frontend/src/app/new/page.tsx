@@ -3,8 +3,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Sparkles, ShoppingBag, Star } from "lucide-react";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+
 import { useCart } from "@/context/CartContext";
 
 const newArrivals = [
@@ -37,7 +36,7 @@ export default function NewArrivalsPage() {
         {newArrivals.map((item) => (
           <div key={item.id} className="group relative flex flex-col rounded-xl border bg-card text-card-foreground shadow-sm overflow-hidden hover:shadow-lg transition-all">
             <div className="aspect-square bg-muted/50 relative overflow-hidden flex items-center justify-center">
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none" />
               <ShoppingBag className="h-12 w-12 text-muted-foreground/30" />
               <div className="absolute top-3 left-3 bg-primary text-primary-foreground text-xs font-bold px-2 py-1 rounded shadow-sm z-20">
                 NEW

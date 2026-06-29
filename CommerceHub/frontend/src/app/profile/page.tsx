@@ -1,11 +1,13 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { User, Package, Settings, CreditCard, LogOut, Heart, Moon, Sun, Monitor, Loader2, Calendar, MapPin } from "lucide-react";
+import { User, Package, Settings, CreditCard, LogOut, Heart, Moon, Sun, Monitor, Loader2, Calendar, MapPin, Trash2 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import api from "@/lib/api";
+import { useWishlist } from "@/context/WishlistContext";
+import Link from "next/link";
 
 function ProfileContent() {
   const searchParams = useSearchParams();
@@ -21,17 +23,21 @@ function ProfileContent() {
   
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const { wishlistItems, removeFromWishlist } = useWishlist();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [orders, setOrders] = useState<any[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
 
   useEffect(() => {
     const tab = searchParams.get("tab");
     if (tab) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setActiveTab(tab);
     }
   }, [searchParams]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
@@ -49,6 +55,7 @@ function ProfileContent() {
 
   useEffect(() => {
     if (activeTab === 'orders') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchOrders();
     }
   }, [activeTab]);
@@ -130,7 +137,7 @@ function ProfileContent() {
                 <Button onClick={() => window.location.href = "/"}>Start Shopping</Button>
               </div>
             ) : (
-              orders.map((order, index) => (
+              orders.map((order) => (
                 <div key={order._id} className="border rounded-xl p-6 bg-card flex flex-col gap-4">
                   <div className="flex justify-between items-start border-b pb-4">
                     <div>
@@ -157,10 +164,12 @@ function ProfileContent() {
                   </div>
                   
                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-2">
+                     {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                      {order.orderItems.map((item: any) => (
                        <div key={item._id} className="flex gap-3 items-center border rounded-lg p-2 bg-muted/20">
                           <div className="w-10 h-10 md:w-12 md:h-12 bg-muted rounded-md flex items-center justify-center text-xs font-bold shrink-0 overflow-hidden">
                              {item.product?.images?.[0] ? (
+                               // eslint-disable-next-line @next/next/no-img-element
                                <img src={item.product.images[0]} alt={item.product.name} className="w-full h-full object-cover" />
                              ) : 'IMG'}
                           </div>
@@ -178,11 +187,40 @@ function ProfileContent() {
         );
       case "wishlist":
         return (
-          <div className="flex flex-col items-center justify-center py-16 text-center border-2 border-dashed rounded-xl">
-            <Heart className="h-16 w-16 text-muted-foreground mb-4 opacity-50" />
-            <h3 className="text-xl font-semibold mb-2">Your wishlist is empty</h3>
-            <p className="text-muted-foreground mb-6 max-w-sm">Save items you love to your wishlist to easily find them later.</p>
-            <Button onClick={() => window.location.href = "/"}>Explore Products</Button>
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold">Your Wishlist</h2>
+            {wishlistItems.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 text-center border-2 border-dashed rounded-xl">
+                <Heart className="h-16 w-16 text-muted-foreground mb-4 opacity-50" />
+                <h3 className="text-xl font-semibold mb-2">Your wishlist is empty</h3>
+                <p className="text-muted-foreground mb-6 max-w-sm">Save items you love to your wishlist to easily find them later.</p>
+                <Button onClick={() => window.location.href = "/"}>Explore Products</Button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {wishlistItems.map((item) => (
+                  <div key={item._id} className="border rounded-xl p-4 flex flex-col gap-3 group">
+                    <Link href={`/product/${item._id}`} className="aspect-square bg-muted rounded-lg overflow-hidden flex items-center justify-center relative">
+                      {item.images && item.images.length > 0 ? (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img src={item.images[0]} alt={item.name} className="object-cover w-full h-full" />
+                      ) : (
+                        <div className="text-muted-foreground font-semibold">IMG</div>
+                      )}
+                    </Link>
+                    <div>
+                      <Link href={`/product/${item._id}`}>
+                        <h4 className="font-semibold line-clamp-1 hover:text-primary">{item.name}</h4>
+                      </Link>
+                      <p className="text-primary font-bold mt-1">₹{item.price.toLocaleString('en-IN')}</p>
+                    </div>
+                    <Button variant="outline" size="sm" className="w-full mt-auto text-red-500 hover:text-red-600 hover:bg-red-50" onClick={() => removeFromWishlist(item._id)}>
+                      <Trash2 className="w-4 h-4 mr-2" /> Remove
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         );
       case "payment":

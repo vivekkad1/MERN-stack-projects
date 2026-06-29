@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+
 
 import Link from "next/link";
 import { 
@@ -9,13 +9,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuGroup
-} from "@/components/ui/dropdown-menu";
+
 
 const categories = [
   { name: "For You", icon: ShoppingBag, href: "/" },
@@ -33,7 +27,10 @@ const categories = [
 
 export function CategoryNav() {
   const pathname = usePathname();
-  const router = useRouter();
+
+  if (pathname.startsWith("/product/")) {
+    return null;
+  }
 
   return (
     <div className="w-full bg-background border-b overflow-hidden shadow-sm">

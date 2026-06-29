@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, use, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Star, Truck, Shield, ArrowLeft, ShoppingCart, Heart } from "lucide-react";
+import { Star, Truck, Shield, ShoppingCart, Heart } from "lucide-react";
 import Link from "next/link";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { useCart } from "@/context/CartContext";
+import { useWishlist } from "@/context/WishlistContext";
+import api from "@/lib/api";
 
 // In a real app, this would be fetched from the backend based on params.id
 const productData = {
@@ -32,16 +32,30 @@ const productData = {
   ]
 };
 
-export default function ProductPage({ params }: { params: { id: string } }) {
+export default function ProductPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const [activeImage, setActiveImage] = useState(0);
   const { addToCart } = useCart();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  
+  const inWishlist = isInWishlist(id);
+  
+  const handleWishlistClick = () => {
+    if (inWishlist) {
+      removeFromWishlist(id);
+    } else {
+      addToWishlist(id);
+    }
+  };
+
+  useEffect(() => {
+    if (id) {
+      api.post('/history/view', { productId: id }).catch(() => {});
+    }
+  }, [id]);
 
   return (
     <div className="container mx-auto px-4 md:px-6 py-8 min-h-screen">
-      <Link href="/" className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "mb-8 text-muted-foreground")}>
-        <ArrowLeft className="mr-2 h-4 w-4" /> Back to Home
-      </Link>
-
       <div className="flex flex-col lg:flex-row gap-12">
         {/* Product Images */}
         <div className="w-full lg:w-1/2 flex flex-col gap-4">
@@ -68,7 +82,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
         {/* Product Details */}
         <div className="w-full lg:w-1/2 flex flex-col">
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
-            {productData.title} (ID: {params.id})
+            {productData.title} (ID: {id})
           </h1>
           
           <div className="flex items-center gap-4 mb-6">
@@ -91,14 +105,14 @@ export default function ProductPage({ params }: { params: { id: string } }) {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 mb-10">
-            <Button size="lg" className="flex-1 h-14 text-lg gap-2" onClick={() => addToCart({ id: params.id, title: productData.title, price: productData.price })}>
+            <Button size="lg" className="flex-1 h-14 text-lg gap-2" onClick={() => addToCart({ id, title: productData.title, price: productData.price })}>
               <ShoppingCart className="h-5 w-5" /> Add to Cart
             </Button>
             <Button size="lg" variant="secondary" className="flex-1 h-14 text-lg gap-2" onClick={() => alert("Proceeding to buy...")}>
               Buy Now
             </Button>
-            <Button size="icon" variant="outline" className="h-14 w-14 shrink-0" onClick={() => alert("Added to wishlist!")}>
-              <Heart className="h-6 w-6" />
+            <Button size="icon" variant="outline" className="h-14 w-14 shrink-0" onClick={handleWishlistClick}>
+              <Heart className={`h-6 w-6 ${inWishlist ? 'fill-red-500 text-red-500' : ''}`} />
             </Button>
           </div>
 
@@ -141,6 +155,31 @@ export default function ProductPage({ params }: { params: { id: string } }) {
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Related Products */}
+      <div className="mt-20">
+        <h2 className="text-2xl font-bold mb-6">Relevant Products</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <Link key={i} href={`/product/${i + 10}`} className="group relative flex flex-col rounded-xl border bg-card text-card-foreground shadow-sm overflow-hidden hover:shadow-lg transition-all">
+              <div className="aspect-square bg-muted/50 relative overflow-hidden flex items-center justify-center">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10" />
+                <ShoppingCart className="h-10 w-10 text-muted-foreground/30" />
+              </div>
+              <div className="p-4 flex flex-col gap-2">
+                <h3 className="font-semibold text-sm line-clamp-1 group-hover:text-primary transition-colors">Similar Headphone {i}</h3>
+                <div className="flex items-center justify-between mt-1">
+                  <span className="font-bold text-sm">₹{(i * 1000 + 15000).toLocaleString('en-IN')}</span>
+                  <div className="flex items-center gap-1 text-[10px]">
+                    <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                    <span>4.{i + 3}</span>
+                  </div>
+                </div>
+              </div>
+            </Link>
+          ))}
         </div>
       </div>
     </div>

@@ -1,15 +1,32 @@
 "use client";
 
-import Image from "next/image";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Star, TrendingUp, Zap, ShoppingBag } from "lucide-react";
+import { ArrowRight, Star, TrendingUp, ShoppingBag, Sparkles } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/context/CartContext";
+import api from "@/lib/api";
 
 export default function Home() {
   const { addToCart } = useCart();
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      try {
+        const res = await api.get('/products/suggestions');
+        if (res.data.success) {
+          setSuggestions(res.data.data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch suggestions", error);
+      }
+    };
+    fetchSuggestions();
+  }, []);
 
   const trendingProducts = [
     { id: 1, title: 'boAt Airdopes 141', desc: 'True Wireless Earbuds with 42H Playtime.', price: '₹1,299', rating: 4.2, label: 'Bestseller' },
@@ -32,7 +49,7 @@ export default function Home() {
               Big Indian Festival Sale is Here!
             </div>
             <h1 className="text-3xl sm:text-4xl md:text-6xl font-extrabold tracking-tight leading-tight">
-              India's Favorite <br className="hidden sm:block" />
+              India&apos;s Favorite <br className="hidden sm:block" />
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-600">
                 Shopping Destination
               </span>
@@ -60,23 +77,51 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Featured Categories */}
-      <section className="container mx-auto px-4 md:px-6">
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-2xl font-bold tracking-tight">Shop by Category</h2>
-          <Link href="/categories" className={buttonVariants({ variant: "ghost" })}>View All Categories</Link>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {['Mobiles', 'Fashion', 'Home Appliances', 'Beauty', 'Groceries', 'Electronics'].map((category, i) => (
-            <div key={i} className="group cursor-pointer flex flex-col items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-xl border bg-card hover:border-primary transition-all hover:shadow-md">
-              <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Zap className="h-5 w-5 md:h-6 md:w-6 text-primary" />
-              </div>
-              <span className="font-medium text-xs md:text-sm text-center">{category}</span>
+
+      {/* Suggested for You */}
+      {suggestions.length > 0 && (
+        <section className="container mx-auto px-4 md:px-6">
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-6 w-6 text-primary" />
+              <h2 className="text-2xl font-bold tracking-tight">Suggested for You</h2>
             </div>
-          ))}
-        </div>
-      </section>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+            {suggestions.map((item) => (
+              <div key={item._id} className="group relative flex flex-col rounded-xl border bg-card text-card-foreground shadow-sm overflow-hidden hover:shadow-lg transition-all">
+                <div className="aspect-square bg-muted/50 relative overflow-hidden flex items-center justify-center">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none" />
+                  {item.images && item.images.length > 0 ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={item.images[0]} alt={item.title} className="w-full h-full object-cover" />
+                  ) : (
+                    <ShoppingBag className="h-12 w-12 text-muted-foreground/30" />
+                  )}
+                </div>
+                <div className="p-3 sm:p-4 md:p-5 flex flex-col gap-1.5 md:gap-2 flex-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] md:text-xs font-semibold text-primary uppercase tracking-wider">Suggested</span>
+                    <div className="flex items-center gap-1 text-[10px] md:text-xs">
+                      <Star className="h-2.5 w-2.5 md:h-3 md:w-3 fill-yellow-400 text-yellow-400" />
+                      <span>{item.rating || "4.5"}</span>
+                    </div>
+                  </div>
+                  <Link href={`/product/${item._id}`} className="before:absolute before:inset-0">
+                    <h3 className="font-semibold text-sm md:text-lg line-clamp-1 group-hover:text-primary transition-colors">{item.title}</h3>
+                  </Link>
+                  <div className="mt-auto pt-2 md:pt-4 flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center justify-between gap-2">
+                    <span className="text-base sm:text-lg md:text-xl font-bold">₹{item.discountPrice || item.basePrice}</span>
+                    <div className="flex gap-2 relative z-10 w-full sm:w-auto">
+                      <Button size="sm" className="w-full sm:w-auto text-xs h-7 md:h-8" variant="outline" onClick={() => addToCart({ id: item._id, title: item.title, price: item.discountPrice || item.basePrice })}>Add</Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Trending Products */}
       <section className="container mx-auto px-4 md:px-6">
@@ -91,7 +136,7 @@ export default function Home() {
           {trendingProducts.map((item) => (
             <div key={item.id} className="group relative flex flex-col rounded-xl border bg-card text-card-foreground shadow-sm overflow-hidden hover:shadow-lg transition-all">
               <div className="aspect-square bg-muted/50 relative overflow-hidden flex items-center justify-center">
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none" />
                 <ShoppingBag className="h-12 w-12 text-muted-foreground/30" />
               </div>
               <div className="p-3 sm:p-4 md:p-5 flex flex-col gap-1.5 md:gap-2 flex-1">

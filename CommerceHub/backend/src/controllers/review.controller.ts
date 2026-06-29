@@ -9,7 +9,7 @@ import mongoose from 'mongoose';
 export const createReview = async (req: Request, res: Response): Promise<void> => {
   try {
     const { rating, comment, images } = req.body;
-    const { productId } = req.params;
+    const productId = req.params.productId as string;
 
     const product = await Product.findById(productId);
     if (!product) {
@@ -51,7 +51,7 @@ export const createReview = async (req: Request, res: Response): Promise<void> =
 // @access  Public
 export const getProductReviews = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { productId } = req.params;
+    const productId = req.params.productId as string;
     const pageNum = Number(req.query.page) || 1;
     const limitNum = Number(req.query.limit) || 10;
     const skip = (pageNum - 1) * limitNum;

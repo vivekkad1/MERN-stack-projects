@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { Product } from '../models/Product';
-import { UserRole } from '../models/User';
+import { User, UserRole } from '../models/User';
+import mongoose from 'mongoose';
 
 // @desc    Get all products (with advanced filtering, search, pagination)
 // @route   GET /api/products
@@ -68,7 +69,7 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
 // @access  Public
 export const getProductById = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { idOrSlug } = req.params;
+    const idOrSlug = req.params.idOrSlug as string;
     const isMongoId = idOrSlug.match(/^[0-9a-fA-F]{24}$/);
 
     const query = isMongoId ? { _id: idOrSlug } : { slug: idOrSlug };
@@ -179,5 +180,62 @@ export const updateInventory = async (req: Request, res: Response): Promise<void
     res.status(200).json({ message: 'Inventory updated successfully', product });
   } catch (error: any) {
     res.status(400).json({ message: error.message });
+  }
+};
+
+// @desc    Get personalized product suggestions
+// @route   GET /api/products/suggestions
+// @access  Private
+export const getSuggestions = async (req: Request, res: Response) => {
+  try {
+    const user = (req as any).user ? await User.findById((req as any).user.id).populate('viewedProducts') : null;
+
+    const query: any = { isActive: true };
+    const orConditions: any[] = [];
+
+    const escapeRegex = (string: string) => {
+      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    };
+
+    if (user) {
+      // 1. Match Search History
+      if (user.searchHistory && user.searchHistory.length > 0) {
+        // Create a regex for each search term, escaping special characters
+        const searchRegexes = user.searchHistory.map(term => new RegExp(escapeRegex(term), 'i'));
+        orConditions.push({ title: { $in: searchRegexes } });
+        orConditions.push({ description: { $in: searchRegexes } });
+      }
+
+      // 2. Match Categories of Viewed Products
+      if (user.viewedProducts && user.viewedProducts.length > 0) {
+        const categories = user.viewedProducts
+          .filter((p: any) => p && p.category)
+          .map((p: any) => p.category);
+        
+        if (categories.length > 0) {
+          orConditions.push({ category: { $in: categories } });
+        }
+      }
+    }
+
+    if (orConditions.length > 0) {
+      query.$or = orConditions;
+    }
+
+    // Fetch matching products
+    let suggestions = await Product.find(query)
+      .limit(8)
+      .sort({ rating: -1, numReviews: -1 });
+
+    // Fallback if no personalized suggestions found
+    if (suggestions.length === 0) {
+      suggestions = await Product.find({ isActive: true })
+        .limit(8)
+        .sort({ sold: -1, rating: -1 });
+    }
+
+    res.status(200).json({ success: true, count: suggestions.length, data: suggestions });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
   }
 };

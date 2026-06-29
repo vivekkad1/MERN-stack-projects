@@ -7,6 +7,7 @@ import { Search, ShoppingCart, User, Menu, Moon, Sun, MapPin, ChevronDown } from
 import { Button, buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useCart } from '@/context/CartContext';
+import api from '@/lib/api';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,6 +28,9 @@ export function Navbar() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
+      // Fire and forget to save search history
+      api.post('/history/search', { query: searchQuery.trim() }).catch(console.error);
+      
       router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
     }
   };
@@ -42,7 +46,7 @@ export function Navbar() {
             const city = data.address.city || data.address.town || data.address.state || "Current Location";
             const pincode = data.address.postcode || "";
             setLocation({ city, pincode });
-          } catch (error) {
+          } catch {
             setLocation({ city: "Location Found", pincode: "" });
           }
         },

@@ -25,6 +25,9 @@ export interface IUser extends Document {
   otpExpires?: Date;
   passwordResetToken?: string;
   passwordResetExpires?: Date;
+  wishlist?: mongoose.Types.ObjectId[];
+  searchHistory?: string[];
+  viewedProducts?: mongoose.Types.ObjectId[];
   comparePassword: (enteredPassword: string) => Promise<boolean>;
 }
 
@@ -68,7 +71,10 @@ const userSchema = new Schema<IUser>(
     otp: { type: String, select: false },
     otpExpires: { type: Date, select: false },
     passwordResetToken: { type: String, select: false },
-    passwordResetExpires: { type: Date, select: false }
+    passwordResetExpires: { type: Date, select: false },
+    wishlist: [{ type: Schema.Types.ObjectId, ref: 'Product' }],
+    searchHistory: [{ type: String }],
+    viewedProducts: [{ type: Schema.Types.ObjectId, ref: 'Product' }]
   },
   {
     timestamps: true

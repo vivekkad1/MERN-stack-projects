@@ -3,7 +3,8 @@ import { User } from '../models/User';
 import { Session } from '../models/Session';
 import { sendEmail } from '../utils/sendEmail';
 import crypto from 'crypto';
-import { authenticator } from 'otplib';
+import { OTP } from 'otplib';
+const authenticator = new OTP({ strategy: 'totp' });
 import QRCode from 'qrcode';
 
 // @desc    Send OTP for email verification
@@ -127,7 +128,7 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
 // @access  Public
 export const resetPassword = async (req: Request, res: Response): Promise<void> => {
   try {
-    const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
+    const hashedToken = crypto.createHash('sha256').update(req.params.token as string).digest('hex');
 
     const user = await User.findOne({
       passwordResetToken: hashedToken,
@@ -165,7 +166,7 @@ export const generate2FA = async (req: Request, res: Response): Promise<void> =>
     user.twoFactorSecret = secret;
     await user.save({ validateBeforeSave: false });
 
-    const otpauth = authenticator.keyuri(user.email, 'CommerceHub', secret);
+    const otpauth = authenticator.generateURI({ issuer: 'CommerceHub', label: user.email, secret });
     const qrCode = await QRCode.toDataURL(otpauth);
 
     res.status(200).json({ qrCode, secret });
@@ -187,7 +188,7 @@ export const verify2FA = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const isValid = authenticator.verify({ token, secret: user.twoFactorSecret });
+    const isValid = authenticator.verifySync({ token, secret: user.twoFactorSecret }).valid;
     
     if (isValid) {
       user.twoFactorEnabled = true;

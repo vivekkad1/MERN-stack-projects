@@ -49,7 +49,7 @@ function SearchResults() {
           {filteredProducts.map((item) => (
             <div key={item.id} className="group relative flex flex-col rounded-xl border bg-card text-card-foreground shadow-sm overflow-hidden hover:shadow-lg transition-all">
               <div className="aspect-square bg-muted/50 relative overflow-hidden flex items-center justify-center">
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none" />
                 <ShoppingBag className="h-12 w-12 text-muted-foreground/30" />
               </div>
               <div className="p-5 flex flex-col gap-2 flex-1">
