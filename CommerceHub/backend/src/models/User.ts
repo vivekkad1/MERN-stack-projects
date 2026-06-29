@@ -21,6 +21,10 @@ export interface IUser extends Document {
   githubId?: string;
   twoFactorEnabled: boolean;
   twoFactorSecret?: string;
+  otp?: string;
+  otpExpires?: Date;
+  passwordResetToken?: string;
+  passwordResetExpires?: Date;
   comparePassword: (enteredPassword: string) => Promise<boolean>;
 }
 
@@ -60,7 +64,11 @@ const userSchema = new Schema<IUser>(
     googleId: { type: String },
     githubId: { type: String },
     twoFactorEnabled: { type: Boolean, default: false },
-    twoFactorSecret: { type: String, select: false }
+    twoFactorSecret: { type: String, select: false },
+    otp: { type: String, select: false },
+    otpExpires: { type: Date, select: false },
+    passwordResetToken: { type: String, select: false },
+    passwordResetExpires: { type: Date, select: false }
   },
   {
     timestamps: true

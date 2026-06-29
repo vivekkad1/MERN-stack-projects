@@ -26,7 +26,7 @@ export const getCart = async (req: Request, res: Response): Promise<void> => {
 // @access  Private
 export const addToCart = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { productId, quantity } = req.body;
+    const { productId, quantity, variantSku, variantName } = req.body;
     const userId = (req as any).user?.id;
 
     const product = await Product.findById(productId);
@@ -44,7 +44,13 @@ export const addToCart = async (req: Request, res: Response): Promise<void> => {
       });
     }
 
-    const itemIndex = cart.items.findIndex(p => p.product.toString() === productId);
+    const itemIndex = cart.items.findIndex(p => {
+      const isProductMatch = p.product.toString() === productId;
+      if (variantSku) {
+        return isProductMatch && p.variantSku === variantSku;
+      }
+      return isProductMatch;
+    });
 
     if (itemIndex > -1) {
       // Product exists in cart, update quantity
@@ -54,6 +60,8 @@ export const addToCart = async (req: Request, res: Response): Promise<void> => {
       // Product does not exist in cart, add new item
       cart.items.push({
         product: new Types.ObjectId(productId),
+        variantSku,
+        variantName,
         quantity,
         priceAtTimeOfAdding: product.discountPrice || product.basePrice
       });

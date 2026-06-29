@@ -9,10 +9,18 @@ import authRoutes from './routes/auth.routes';
 import cartRoutes from './routes/cart.routes';
 import orderRoutes from './routes/order.routes';
 import addressRoutes from './routes/address.routes';
+import productRoutes from './routes/product.routes';
+import categoryRoutes from './routes/category.routes';
+import brandRoutes from './routes/brand.routes';
+import reviewRoutes from './routes/review.routes';
+import paymentRoutes from './routes/payment.routes';
 
 dotenv.config();
 
 const app = express();
+
+// Stripe webhook needs raw body, not JSON
+app.use('/api/payments/webhook', express.raw({ type: 'application/json' }));
 
 // Middlewares
 app.use(express.json());
@@ -30,6 +38,11 @@ app.use('/api/auth', authRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/addresses', addressRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/brands', brandRoutes);
+app.use('/api/reviews', reviewRoutes);
+app.use('/api/payments', paymentRoutes);
 
 // Basic health check route
 app.get('/health', (req, res) => {
