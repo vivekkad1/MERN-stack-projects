@@ -4,6 +4,7 @@ import { Cart } from '../models/Cart';
 import { Product } from '../models/Product';
 import { Types } from 'mongoose';
 import { UserRole } from '../models/User';
+import { sendNotificationToUser } from '../socket';
 
 // @desc    Create new order
 // @route   POST /api/orders
@@ -170,6 +171,14 @@ export const updateOrderToDelivered = async (req: Request, res: Response): Promi
       order.status = 'Delivered';
 
       const updatedOrder = await order.save();
+      
+      // Notify the customer
+      sendNotificationToUser(order.user.toString(), 'notification', {
+        title: 'Order Delivered!',
+        message: `Your order #${order._id.toString().substring(0, 8)} has been delivered.`,
+        type: 'success'
+      });
+
       res.status(200).json(updatedOrder);
     } else {
       res.status(404).json({ message: 'Order not found' });

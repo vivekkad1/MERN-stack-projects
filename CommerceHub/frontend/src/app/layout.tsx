@@ -5,6 +5,8 @@ import { Navbar } from "@/components/layout/Navbar";
 import { CategoryNav } from "@/components/layout/CategoryNav";
 import { Footer } from "@/components/layout/Footer";
 import { ClientProvider } from "@/components/providers/ClientProvider";
+import { SocketProvider } from "@/components/providers/SocketProvider";
+import { ChatBot } from "@/components/chat/ChatBot";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -25,12 +27,15 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
         <ClientProvider>
-          <div className="relative flex min-h-screen flex-col">
+          <SocketProvider>
+            <div className="relative flex min-h-screen flex-col">
             <Navbar />
             <CategoryNav />
             <main className="flex-1">{children}</main>
             <Footer />
+            <ChatBot />
           </div>
+          </SocketProvider>
         </ClientProvider>
       </body>
     </html>

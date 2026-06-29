@@ -7,7 +7,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import api from "@/lib/api";
-import { CheckCircle2, Loader2 } from "lucide-react";
+import { CheckCircle2, Loader2, CreditCard, Banknote } from "lucide-react";
+import { loadScript } from "@/lib/loadScript";
+
+// Type declaration for Razorpay attached to window
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -44,6 +52,9 @@ export default function CheckoutPage() {
   const handlePlaceOrder = async () => {
     setLoading(true);
     try {
+      const deliveryFee = cartTotal > 500 || cartTotal === 0 ? 0 : 50;
+      const totalAmount = cartTotal + deliveryFee;
+
       const orderData = {
         orderItems: cartItems.map(item => ({
           product: item.id,
@@ -54,13 +65,92 @@ export default function CheckoutPage() {
         paymentMethod,
         itemsPrice: cartTotal,
         taxPrice: 0,
-        shippingPrice: cartTotal > 500 ? 0 : 50,
-        totalPrice: cartTotal + (cartTotal > 500 ? 0 : 50)
+        shippingPrice: deliveryFee,
+        totalPrice: totalAmount
       };
 
-      await api.post('/orders', orderData);
-      await clearCart();
-      setStep(4); // Success step
+      if (paymentMethod === "Cash on Delivery") {
+        await api.post('/orders', orderData);
+        await clearCart();
+        setStep(4); // Success step
+      } else if (paymentMethod === "Razorpay") {
+        // 1. Load Razorpay script
+        const res = await loadScript("https://checkout.razorpay.com/v1/checkout.js");
+        if (!res) {
+          alert("Razorpay SDK failed to load. Are you online?");
+          setLoading(false);
+          return;
+        }
+
+        // 2. Create Razorpay order on backend
+        const orderResponse = await api.post('/payments/razorpay/create-order', {
+          amount: totalAmount
+        });
+
+        if (!orderResponse.data.success) {
+          alert("Server error. Please try again.");
+          setLoading(false);
+          return;
+        }
+
+        const { id, amount, currency, mocked } = orderResponse.data.data;
+
+        // 3. Initialize Razorpay options
+        const options = {
+          key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_dummy_key", 
+          amount: amount.toString(),
+          currency: currency,
+          name: "CommerceHub",
+          description: "Test Transaction",
+          order_id: id,
+          handler: async function (response: any) {
+            try {
+              // 4. Verify Payment on backend
+              const verifyRes = await api.post('/payments/razorpay/verify', {
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature || "mock_signature",
+                orderData
+              });
+
+              if (verifyRes.data.success) {
+                await clearCart();
+                setStep(4);
+              }
+            } catch (err) {
+              console.error(err);
+              alert("Payment verification failed.");
+            }
+          },
+          prefill: {
+            name: address.fullName,
+            email: "test@example.com",
+            contact: address.phone
+          },
+          theme: {
+            color: "#2563eb"
+          }
+        };
+
+        // If backend returned a mocked order because keys are missing, simulate success immediately
+        if (mocked) {
+          console.warn("MOCK PAYMENT: Simulating Razorpay success because keys are missing.");
+          options.handler({
+            razorpay_payment_id: "pay_mock_" + Math.random().toString(36).substring(7),
+            razorpay_order_id: id,
+            razorpay_signature: "mock_sig"
+          });
+          setLoading(false);
+          return;
+        }
+
+        const paymentObject = new window.Razorpay(options);
+        paymentObject.on('payment.failed', function (response: any) {
+          alert("Payment failed: " + response.error.description);
+        });
+        
+        paymentObject.open();
+      }
     } catch (error) {
       console.error("Failed to place order:", error);
       alert("Failed to place order. Please try again or login.");
@@ -140,18 +230,38 @@ export default function CheckoutPage() {
           <div className="bg-card p-6 md:p-8 rounded-2xl border">
             <h2 className="text-2xl font-semibold mb-6">Payment Method</h2>
             <div className="space-y-4">
-              <label className={`flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-colors ${paymentMethod === 'Cash on Delivery' ? 'border-primary bg-primary/5' : 'hover:bg-muted'}`}>
-                <input type="radio" name="payment" value="Cash on Delivery" checked={paymentMethod === 'Cash on Delivery'} onChange={(e) => setPaymentMethod(e.target.value)} className="w-5 h-5 text-primary" />
-                <span className="font-medium text-lg">Cash on Delivery</span>
-              </label>
-              <label className={`flex items-center gap-4 p-4 rounded-xl border cursor-pointer opacity-50`}>
-                <input type="radio" name="payment" value="Stripe" disabled className="w-5 h-5" />
-                <span className="font-medium text-lg">Credit Card (Stripe) <span className="text-sm text-muted-foreground ml-2">(Coming in Phase 2)</span></span>
-              </label>
+              <div 
+                className={`flex items-center p-4 border rounded-xl cursor-pointer transition-colors ${paymentMethod === 'Razorpay' ? 'border-primary bg-primary/5' : 'hover:border-primary/50'}`}
+                onClick={() => setPaymentMethod('Razorpay')}
+              >
+                <div className="h-4 w-4 rounded-full border border-primary flex items-center justify-center mr-4">
+                  {paymentMethod === 'Razorpay' && <div className="h-2 w-2 rounded-full bg-primary" />}
+                </div>
+                <CreditCard className="w-6 h-6 mr-3 text-muted-foreground" />
+                <div className="flex-1">
+                  <p className="font-medium">Razorpay (Cards, UPI, NetBanking)</p>
+                  <p className="text-sm text-muted-foreground">Pay securely via Razorpay</p>
+                </div>
+              </div>
+
+              <div 
+                className={`flex items-center p-4 border rounded-xl cursor-pointer transition-colors ${paymentMethod === 'Cash on Delivery' ? 'border-primary bg-primary/5' : 'hover:border-primary/50'}`}
+                onClick={() => setPaymentMethod('Cash on Delivery')}
+              >
+                <div className="h-4 w-4 rounded-full border border-primary flex items-center justify-center mr-4">
+                  {paymentMethod === 'Cash on Delivery' && <div className="h-2 w-2 rounded-full bg-primary" />}
+                </div>
+                <Banknote className="w-6 h-6 mr-3 text-muted-foreground" />
+                <div className="flex-1">
+                  <p className="font-medium">Cash on Delivery</p>
+                  <p className="text-sm text-muted-foreground">Pay when your order is delivered</p>
+                </div>
+              </div>
             </div>
-            <div className="mt-8 flex justify-between">
+            
+            <div className="mt-8 flex gap-4">
               <Button variant="outline" onClick={() => setStep(1)}>Back</Button>
-              <Button onClick={handleNextStep}>Review Order</Button>
+              <Button onClick={handleNextStep}>Continue to Review</Button>
             </div>
           </div>
         )}
