@@ -16,6 +16,8 @@ import reviewRoutes from './routes/review.routes';
 import wishlistRoutes from './routes/wishlist.routes';
 import paymentRoutes from './routes/payment.routes';
 import historyRoutes from './routes/history.routes';
+import adminRoutes from './routes/admin.routes';
+import sellerRoutes from './routes/seller.routes';
 
 dotenv.config();
 
@@ -46,6 +48,8 @@ app.use('/api/brands', brandRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/history', historyRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/seller', sellerRoutes);
 app.use('/api/payments', paymentRoutes);
 
 // Basic health check route
