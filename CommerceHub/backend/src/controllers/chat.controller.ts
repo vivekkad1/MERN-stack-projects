@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import { GoogleGenAI } from '@google/genai';
 import { Product } from '../models/Product';
 
 // @desc    Handle chat with Gemini Assistant
@@ -17,6 +16,7 @@ export const handleChat = async (req: Request, res: Response): Promise<void> => 
       return;
     }
 
+    const { GoogleGenAI } = await import('@google/genai');
     const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
     // 1. Fetch catalog summary for context

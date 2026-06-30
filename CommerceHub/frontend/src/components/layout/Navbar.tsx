@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Search, ShoppingCart, User, Menu, Moon, Sun, MapPin, ChevronDown } from 'lucide-react';
+import { Search, ShoppingCart, User, Menu, Moon, Sun, MapPin, ChevronDown, ShoppingBag } from 'lucide-react';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useCart } from '@/context/CartContext';
@@ -24,10 +24,53 @@ export function Navbar() {
   const [location, setLocation] = useState({ city: "Select Location", pincode: "" });
   const [searchQuery, setSearchQuery] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const searchRef = useRef<HTMLFormElement>(null);
+  const mobileSearchRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+      if (mobileSearchRef.current && !mobileSearchRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      if (searchQuery.trim().length > 1) {
+        setIsSearching(true);
+        try {
+          const res = await api.get(`/products?keyword=${encodeURIComponent(searchQuery.trim())}&limit=5`);
+          if (res.data && res.data.products) {
+            setSuggestions(res.data.products);
+            setShowSuggestions(true);
+          }
+        } catch (error) {
+          console.error("Failed to fetch suggestions", error);
+        } finally {
+          setIsSearching(false);
+        }
+      } else {
+        setSuggestions([]);
+        setShowSuggestions(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
+      setShowSuggestions(false);
       // Fire and forget to save search history
       api.post('/history/search', { query: searchQuery.trim() }).catch(console.error);
       
@@ -87,17 +130,58 @@ export function Navbar() {
 
           {/* Desktop Navigation & Search */}
           <div className="hidden md:flex flex-1 items-center justify-center px-8">
-            <form onSubmit={handleSearch} className="w-full max-w-lg relative group">
+            <form ref={searchRef} onSubmit={handleSearch} className="w-full max-w-lg relative group">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Search className="h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
               </div>
               <input
                 type="text"
                 value={searchQuery}
+                onFocus={() => { if (searchQuery.trim().length > 1) setShowSuggestions(true); }}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="block w-full pl-10 pr-3 py-2 border border-input rounded-full leading-5 bg-background focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary sm:text-sm transition-all"
                 placeholder="Search products, brands and categories..."
+                suppressHydrationWarning
               />
+              
+              {/* Autocomplete Dropdown */}
+              {showSuggestions && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-background border rounded-xl shadow-lg overflow-hidden z-50">
+                  {isSearching ? (
+                    <div className="p-4 text-center text-sm text-muted-foreground">Loading...</div>
+                  ) : suggestions.length > 0 ? (
+                    <div className="flex flex-col">
+                      {suggestions.map((item) => (
+                        <div 
+                          key={item._id} 
+                          onClick={() => { setShowSuggestions(false); router.push(`/product/${item._id}`); }}
+                          className="flex items-center gap-3 p-3 hover:bg-muted/50 cursor-pointer border-b last:border-0 transition-colors"
+                        >
+                          <div className="w-10 h-10 bg-muted rounded overflow-hidden shrink-0 flex items-center justify-center">
+                            {item.images && item.images[0] ? (
+                              <img src={item.images[0]} alt={item.title} className="w-full h-full object-cover" />
+                            ) : (
+                              <ShoppingBag className="w-4 h-4 text-muted-foreground" />
+                            )}
+                          </div>
+                          <div className="flex flex-col overflow-hidden">
+                            <span className="text-sm font-medium truncate">{item.title}</span>
+                            <span className="text-xs text-muted-foreground">₹{item.discountPrice || item.basePrice}</span>
+                          </div>
+                        </div>
+                      ))}
+                      <div 
+                        onClick={handleSearch}
+                        className="p-2 text-center text-xs font-semibold text-primary hover:bg-muted/50 cursor-pointer bg-muted/20"
+                      >
+                        View all results for "{searchQuery}"
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-4 text-center text-sm text-muted-foreground">No products found</div>
+                  )}
+                </div>
+              )}
             </form>
 
           </div>
@@ -155,17 +239,58 @@ export function Navbar() {
       {/* Mobile Menu Dropdown */}
       {isMobileMenuOpen && (
         <div className="md:hidden border-t bg-background px-4 py-4 space-y-4 shadow-lg absolute w-full left-0 top-16 z-40">
-          <form onSubmit={(e) => { handleSearch(e); setIsMobileMenuOpen(false); }} className="w-full relative group">
+          <form ref={mobileSearchRef} onSubmit={(e) => { handleSearch(e); setIsMobileMenuOpen(false); }} className="w-full relative group">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
             </div>
             <input
               type="text"
               value={searchQuery}
+              onFocus={() => { if (searchQuery.trim().length > 1) setShowSuggestions(true); }}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="block w-full pl-10 pr-3 py-2 border border-input rounded-full leading-5 bg-background focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary sm:text-sm transition-all"
               placeholder="Search products..."
+              suppressHydrationWarning
             />
+            
+            {/* Mobile Autocomplete Dropdown */}
+            {showSuggestions && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-background border rounded-xl shadow-lg overflow-hidden z-50 max-h-[60vh] overflow-y-auto">
+                {isSearching ? (
+                  <div className="p-4 text-center text-sm text-muted-foreground">Loading...</div>
+                ) : suggestions.length > 0 ? (
+                  <div className="flex flex-col">
+                    {suggestions.map((item) => (
+                      <div 
+                        key={item._id} 
+                        onClick={() => { setShowSuggestions(false); setIsMobileMenuOpen(false); router.push(`/product/${item._id}`); }}
+                        className="flex items-center gap-3 p-3 hover:bg-muted/50 cursor-pointer border-b last:border-0 transition-colors"
+                      >
+                        <div className="w-10 h-10 bg-muted rounded overflow-hidden shrink-0 flex items-center justify-center">
+                          {item.images && item.images[0] ? (
+                            <img src={item.images[0]} alt={item.title} className="w-full h-full object-cover" />
+                          ) : (
+                            <ShoppingBag className="w-4 h-4 text-muted-foreground" />
+                          )}
+                        </div>
+                        <div className="flex flex-col overflow-hidden">
+                          <span className="text-sm font-medium truncate">{item.title}</span>
+                          <span className="text-xs text-muted-foreground">₹{item.discountPrice || item.basePrice}</span>
+                        </div>
+                      </div>
+                    ))}
+                    <div 
+                      onClick={(e) => { handleSearch(e as any); setIsMobileMenuOpen(false); }}
+                      className="p-3 text-center text-sm font-semibold text-primary hover:bg-muted/50 cursor-pointer bg-muted/20"
+                    >
+                      View all results
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-4 text-center text-sm text-muted-foreground">No products found</div>
+                )}
+              </div>
+            )}
           </form>
 
           <div className="pt-2 border-t flex items-center cursor-pointer text-sm text-muted-foreground hover:text-primary transition-colors" onClick={fetchLocation}>

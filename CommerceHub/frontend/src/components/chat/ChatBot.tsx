@@ -80,6 +80,7 @@ export function ChatBot() {
         onClick={() => setIsOpen(true)}
         className={`fixed bottom-6 right-6 p-4 rounded-full bg-primary text-primary-foreground shadow-xl hover:shadow-2xl hover:scale-105 transition-all z-50 flex items-center justify-center ${isOpen ? 'scale-0 opacity-0 pointer-events-none' : 'scale-100 opacity-100'}`}
         aria-label="Open AI Assistant"
+        suppressHydrationWarning
       >
         <MessageCircle className="w-6 h-6" />
       </button>
@@ -102,6 +103,7 @@ export function ChatBot() {
           <button 
             onClick={() => setIsOpen(false)}
             className="p-2 hover:bg-white/20 rounded-full transition-colors"
+            suppressHydrationWarning
           >
             <X className="w-5 h-5" />
           </button>
@@ -143,6 +145,7 @@ export function ChatBot() {
               placeholder="Ask about products..."
               className="flex-1 rounded-full bg-muted/50 border-transparent focus-visible:ring-1 focus-visible:ring-primary focus-visible:border-primary"
               disabled={isLoading}
+              suppressHydrationWarning
             />
             <Button 
               type="submit" 
