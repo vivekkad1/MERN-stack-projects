@@ -10,11 +10,18 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
   try {
     if (mongoose.connection.readyState !== 1) {
       const mockProducts = [
-        { _id: '1', title: 'iPhone 15 Pro', description: 'Latest Apple iPhone with A17 Pro chip.', basePrice: 134900, discountPrice: 129900, images: ['https://m.media-amazon.com/images/I/81+GIkwqLIL._SX679_.jpg'], rating: 4.8 },
-        { _id: '2', title: 'Sony WH-1000XM5', description: 'Industry leading noise canceling headphones.', basePrice: 29990, discountPrice: 24990, images: ['https://m.media-amazon.com/images/I/61vJtKbAssL._SX522_.jpg'], rating: 4.6 },
-        { _id: '3', title: 'Samsung Galaxy S24 Ultra', description: 'AI powered smartphone with S-Pen.', basePrice: 129999, discountPrice: 124999, images: ['https://m.media-amazon.com/images/I/71CXhVhpM0L._SX679_.jpg'], rating: 4.7 }
+        { _id: '201', title: 'iPhone 15 Pro Max', description: 'Titanium design with A17 Pro chip.', basePrice: 159900, discountPrice: 159900, images: ['https://images.unsplash.com/photo-1695048133142-1a20a5bf616f?q=80&w=400&auto=format&fit=crop'], rating: 4.8 },
+        { _id: '101', title: 'Sony WH-1000XM5', description: 'Industry leading noise canceling headphones.', basePrice: 34990, discountPrice: 29990, images: ['https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?q=80&w=400&auto=format&fit=crop'], rating: 4.9 },
+        { _id: '202', title: 'Samsung Galaxy S24 Ultra', description: 'Galaxy AI is here.', basePrice: 134999, discountPrice: 129999, images: ['https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?q=80&w=400&auto=format&fit=crop'], rating: 4.7 }
       ];
-      res.status(200).json({ success: true, count: mockProducts.length, pagination: {}, products: mockProducts, message: 'Database disconnected - returning mock data' });
+      let returnedProducts = mockProducts;
+      if (req.query.keyword) {
+        const kw = String(req.query.keyword).toLowerCase();
+        returnedProducts = mockProducts.filter(p => 
+          p.title.toLowerCase().includes(kw) || p.description.toLowerCase().includes(kw)
+        );
+      }
+      res.status(200).json({ success: true, count: returnedProducts.length, pagination: {}, products: returnedProducts, message: 'Database disconnected - returning mock data' });
       return;
     }
     const { keyword, category, brand, minPrice, maxPrice, minRating, page, limit, sort } = req.query;
@@ -199,9 +206,9 @@ export const getSuggestions = async (req: Request, res: Response) => {
   try {
     if (mongoose.connection.readyState !== 1) {
       const mockSuggestions = [
-        { _id: '1', title: 'iPhone 15 Pro', description: 'Latest Apple iPhone with A17 Pro chip.', basePrice: 134900, discountPrice: 129900, images: ['https://m.media-amazon.com/images/I/81+GIkwqLIL._SX679_.jpg'], rating: 4.8 },
-        { _id: '2', title: 'Sony WH-1000XM5', description: 'Industry leading noise canceling headphones.', basePrice: 29990, discountPrice: 24990, images: ['https://m.media-amazon.com/images/I/61vJtKbAssL._SX522_.jpg'], rating: 4.6 },
-        { _id: '3', title: 'Samsung Galaxy S24 Ultra', description: 'AI powered smartphone with S-Pen.', basePrice: 129999, discountPrice: 124999, images: ['https://m.media-amazon.com/images/I/71CXhVhpM0L._SX679_.jpg'], rating: 4.7 }
+        { _id: '201', title: 'iPhone 15 Pro Max', description: 'Titanium design with A17 Pro chip.', basePrice: 159900, discountPrice: 159900, images: ['https://images.unsplash.com/photo-1695048133142-1a20a5bf616f?q=80&w=400&auto=format&fit=crop'], rating: 4.8 },
+        { _id: '101', title: 'Sony WH-1000XM5', description: 'Industry leading noise canceling headphones.', basePrice: 34990, discountPrice: 29990, images: ['https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?q=80&w=400&auto=format&fit=crop'], rating: 4.9 },
+        { _id: '202', title: 'Samsung Galaxy S24 Ultra', description: 'Galaxy AI is here.', basePrice: 134999, discountPrice: 129999, images: ['https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?q=80&w=400&auto=format&fit=crop'], rating: 4.7 }
       ];
       res.status(200).json({ success: true, count: mockSuggestions.length, data: mockSuggestions, message: 'Database disconnected - returning mock suggestions' });
       return;
