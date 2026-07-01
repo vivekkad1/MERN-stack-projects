@@ -3,19 +3,14 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Sparkles, ShoppingBag, Star } from "lucide-react";
+import { mockProducts } from "@/lib/mockData";
 
 import { useCart } from "@/context/CartContext";
 
-const newArrivals = [
-  { id: 101, title: 'Sony WH-1000XM5', desc: 'Industry leading noise canceling headphones.', price: '₹29,990', rating: 4.9, label: 'New' },
-  { id: 102, title: 'Apple Watch Series 9', desc: 'Smarter, brighter, mightier.', price: '₹41,900', rating: 4.8, label: 'New' },
-  { id: 103, title: 'Samsung Galaxy S24 Ultra', desc: 'Galaxy AI is here.', price: '₹1,29,999', rating: 4.9, label: 'New' },
-  { id: 104, title: 'Nike Air Max Pulse', desc: 'Mens shoes with iconic design.', price: '₹13,995', rating: 4.7, label: 'New' },
-  { id: 105, title: 'Dyson Airwrap', desc: 'Multi-styler Complete Long.', price: '₹45,900', rating: 4.8, label: 'New' },
-  { id: 106, title: 'PlayStation 5 Slim', desc: 'Next-gen gaming console.', price: '₹44,990', rating: 4.9, label: 'New' },
-  { id: 107, title: 'Kindle Paperwhite', desc: 'Now with a 6.8" display and thinner borders.', price: '₹13,999', rating: 4.6, label: 'New' },
-  { id: 108, title: 'Lego Star Wars Millennium Falcon', desc: 'Ultimate Collector Series.', price: '₹74,999', rating: 4.9, label: 'New' },
-];
+const newArrivals = mockProducts.slice(4, 12).map(p => ({
+  ...p,
+  label: 'New'
+}));
 
 export default function NewArrivalsPage() {
   const { addToCart } = useCart();
@@ -37,7 +32,7 @@ export default function NewArrivalsPage() {
           <div key={item.id} className="group relative flex flex-col rounded-xl border bg-card text-card-foreground shadow-sm overflow-hidden hover:shadow-lg transition-all">
             <div className="aspect-square bg-muted/50 relative overflow-hidden flex items-center justify-center">
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none" />
-              <ShoppingBag className="h-12 w-12 text-muted-foreground/30" />
+              <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
               <div className="absolute top-3 left-3 bg-primary text-primary-foreground text-xs font-bold px-2 py-1 rounded shadow-sm z-20">
                 NEW
               </div>
@@ -55,9 +50,11 @@ export default function NewArrivalsPage() {
               </Link>
               <p className="text-muted-foreground text-sm line-clamp-2">{item.desc}</p>
               <div className="mt-auto pt-4 flex flex-wrap items-center justify-between gap-2">
-                <span className="text-xl font-bold">{item.price}</span>
+                <span className="text-xl font-bold">
+                  {typeof item.price === 'number' ? `₹${item.price.toLocaleString('en-IN')}` : item.price}
+                </span>
                 <div className="flex gap-2 relative z-10">
-                  <Button size="sm" variant="outline" onClick={() => addToCart({ id: item.id, title: item.title, price: parseInt(item.price.replace(/[^\d]/g, '')) })}>Add to Cart</Button>
+                  <Button size="sm" variant="outline" onClick={() => addToCart({ id: item.id, title: item.title, price: typeof item.price === 'number' ? item.price : parseInt(String(item.price).replace(/[^\d]/g, '')) })}>Add to Cart</Button>
                 </div>
               </div>
             </div>

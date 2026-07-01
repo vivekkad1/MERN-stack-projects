@@ -7,6 +7,7 @@ import { Search, ShoppingCart, User, Menu, Moon, Sun, MapPin, ChevronDown, Shopp
 import { Button, buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
 import api from '@/lib/api';
 import {
   DropdownMenu,
@@ -20,6 +21,7 @@ import {
 
 export function Navbar() {
   const { cartCount } = useCart();
+  const { user } = useAuth();
   const router = useRouter();
   const [location, setLocation] = useState({ city: "Select Location", pincode: "" });
   const [searchQuery, setSearchQuery] = useState("");
@@ -71,8 +73,10 @@ export function Navbar() {
     e.preventDefault();
     if (searchQuery.trim()) {
       setShowSuggestions(false);
-      // Fire and forget to save search history
-      api.post('/history/search', { query: searchQuery.trim() }).catch(console.error);
+      // Fire and forget to save search history only if logged in
+      if (user) {
+        api.post('/history/search', { query: searchQuery.trim() }).catch(console.error);
+      }
       
       router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
     }

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { mockProducts } from "@/lib/mockData";
 import { Star, Filter, ArrowUpDown } from "lucide-react";
 
 export default async function CategoryPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -8,14 +9,39 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
   // Format the slug for display (e.g. 'home-appliances' -> 'Home Appliances')
   const title = slug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 
+  // Diverse fallback images for mock data
+  const fallbackImages = [
+    "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=400&auto=format&fit=crop", // Headphones
+    "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=400&auto=format&fit=crop", // Watch
+    "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?q=80&w=400&auto=format&fit=crop", // Camera
+    "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=400&auto=format&fit=crop", // Shoes
+    "https://images.unsplash.com/photo-1572569531935-c2eec7ebcc79?q=80&w=400&auto=format&fit=crop", // Backpack
+    "https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?q=80&w=400&auto=format&fit=crop", // Headphones 2
+    "https://images.unsplash.com/photo-1585386959920-141b015f8342?q=80&w=400&auto=format&fit=crop", // Smartphone
+    "https://images.unsplash.com/photo-1583394838336-acd977736f90?q=80&w=400&auto=format&fit=crop"  // Smartwatch
+  ];
+
+  const getProductsBySlug = (slug: string) => {
+    switch (slug) {
+      case 'mobiles': return mockProducts.filter(p => p.id.startsWith('20'));
+      case 'fashion': return mockProducts.filter(p => p.id.startsWith('30'));
+      case 'home-appliances': return mockProducts.filter(p => p.id.startsWith('40'));
+      case 'electronics': return mockProducts.filter(p => p.id.startsWith('50'));
+      default: return Array.from({ length: 8 }).map((_, i) => ({
+        id: `mock-${i + 1}`,
+        title: `${title} Product ${i + 1}`,
+        price: 5000 + i * 500,
+        rating: 4 + (i % 5) * 0.2,
+        reviews: 50 + i * 15,
+        image: fallbackImages[i % fallbackImages.length]
+      }));
+    }
+  };
+
+  const products = getProductsBySlug(slug);
+
   // Mock products for the category
-  const products = Array.from({ length: 8 }).map((_, i) => ({
-    id: i + 1,
-    title: `${title} Product ${i + 1}`,
-    price: `₹${(5000 + i * 500).toFixed(0)}`,
-    rating: (4 + (i % 5) * 0.2).toFixed(1),
-    reviews: 50 + i * 15,
-  }));
+
 
   const subcategoryMap: Record<string, { name: string; color: string; isSpecial?: boolean }[]> = {
     fashion: [
@@ -245,7 +271,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
           {products.map((product) => (
             <div key={product.id} className="group relative flex flex-col rounded-xl border bg-card text-card-foreground shadow-sm overflow-hidden hover:shadow-lg transition-all">
               <Link href={`/product/${product.id}`} className="aspect-square bg-muted/40 relative overflow-hidden flex items-center justify-center p-4">
-                <div className="w-full h-full rounded-md bg-muted animate-pulse" />
+                <img src={product.image} alt={product.title} className="absolute inset-0 w-full h-full object-cover" />
               </Link>
               <div className="p-4 flex flex-col gap-2 flex-1">
                 <Link href={`/product/${product.id}`} className="before:absolute before:inset-0">
@@ -259,7 +285,9 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
                 </div>
                 
                 <div className="mt-auto pt-3 flex items-center justify-between">
-                  <span className="text-lg font-bold">{product.price}</span>
+                  <span className="text-lg font-bold">
+                    {typeof product.price === 'number' ? `₹${product.price.toLocaleString('en-IN')}` : product.price}
+                  </span>
                   <div className="relative z-10">
                     <Button size="sm" variant="secondary">Add</Button>
                   </div>

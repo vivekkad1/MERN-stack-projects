@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Star, TrendingUp, ShoppingBag, Sparkles } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
+import { mockProducts } from "@/lib/mockData";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/context/CartContext";
 import api from "@/lib/api";
@@ -28,12 +29,10 @@ export default function Home() {
     fetchSuggestions();
   }, []);
 
-  const trendingProducts = [
-    { id: 1, title: 'boAt Airdopes 141', desc: 'True Wireless Earbuds with 42H Playtime.', price: '₹1,299', rating: 4.2, label: 'Bestseller' },
-    { id: 2, title: 'OnePlus Nord CE 3 Lite', desc: 'Pastel Lime, 8GB RAM, 128GB Storage, 108MP Camera.', price: '₹19,999', rating: 4.8, label: 'Trending' },
-    { id: 3, title: 'Kanjivaram Silk Saree', desc: 'Authentic pure silk saree with zari border for festive wear.', price: '₹4,599', rating: 4.7, label: 'Top Rated' },
-    { id: 4, title: 'Pigeon Handy Mini Chopper', desc: 'Plastic Chopper with 3 Blades for daily kitchen use, Green.', price: '₹249', rating: 4.5, label: 'Deal' }
-  ];
+  const trendingProducts = mockProducts.slice(0, 4).map((p, index) => ({
+    ...p,
+    label: ['Bestseller', 'Trending', 'Top Rated', 'Deal'][index % 4]
+  }));
 
   return (
     <div className="flex flex-col gap-16 pb-16">
@@ -68,10 +67,7 @@ export default function Home() {
           </div>
           <div className="flex-1 w-full flex justify-center md:justify-end mt-8 md:mt-0">
             <div className="relative w-full max-w-[300px] sm:max-w-[400px] md:max-w-[500px] aspect-square rounded-2xl overflow-hidden shadow-2xl bg-white/10 backdrop-blur-sm border border-white/20">
-              {/* Fallback image if no real image is provided */}
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-blue-600/20 flex items-center justify-center">
-                <ShoppingBag className="w-24 h-24 md:w-32 md:h-32 text-primary/40" />
-              </div>
+              <img src="https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=2070&auto=format&fit=crop" alt="Shopping" className="w-full h-full object-cover" />
             </div>
           </div>
         </div>
@@ -111,7 +107,9 @@ export default function Home() {
                     <h3 className="font-semibold text-sm md:text-lg line-clamp-1 group-hover:text-primary transition-colors">{item.title}</h3>
                   </Link>
                   <div className="mt-auto pt-2 md:pt-4 flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center justify-between gap-2">
-                    <span className="text-base sm:text-lg md:text-xl font-bold">₹{item.discountPrice || item.basePrice}</span>
+                      <span className="font-bold text-lg">
+                        {typeof item.price === 'number' ? `₹${item.price.toLocaleString('en-IN')}` : item.price}
+                      </span>
                     <div className="flex gap-2 relative z-10 w-full sm:w-auto">
                       <Button size="sm" className="w-full sm:w-auto text-xs h-7 md:h-8" variant="outline" onClick={() => addToCart({ id: item._id, title: item.title, price: item.discountPrice || item.basePrice })}>Add</Button>
                     </div>
@@ -137,7 +135,11 @@ export default function Home() {
             <div key={item.id} className="group relative flex flex-col rounded-xl border bg-card text-card-foreground shadow-sm overflow-hidden hover:shadow-lg transition-all">
               <div className="aspect-square bg-muted/50 relative overflow-hidden flex items-center justify-center">
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none" />
-                <ShoppingBag className="h-12 w-12 text-muted-foreground/30" />
+                {item.image ? (
+                  <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
+                ) : (
+                  <ShoppingBag className="h-12 w-12 text-muted-foreground/30" />
+                )}
               </div>
               <div className="p-3 sm:p-4 md:p-5 flex flex-col gap-1.5 md:gap-2 flex-1">
                 <div className="flex items-center justify-between">
@@ -151,9 +153,9 @@ export default function Home() {
                   <h3 className="font-semibold text-sm md:text-lg line-clamp-1 group-hover:text-primary transition-colors">{item.title}</h3>
                 </Link>
                 <div className="mt-auto pt-2 md:pt-4 flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center justify-between gap-2">
-                  <span className="text-base sm:text-lg md:text-xl font-bold">{item.price}</span>
+                  <span className="text-base sm:text-lg md:text-xl font-bold">{typeof item.price === 'number' ? `₹${item.price.toLocaleString('en-IN')}` : item.price}</span>
                   <div className="flex gap-2 relative z-10 w-full sm:w-auto">
-                    <Button size="sm" className="w-full sm:w-auto text-xs h-7 md:h-8" variant="outline" onClick={() => addToCart({ id: item.id, title: item.title, price: parseInt(item.price.replace(/[^\d]/g, '')) })}>Add</Button>
+                    <Button size="sm" className="w-full sm:w-auto text-xs h-7 md:h-8" variant="outline" onClick={() => addToCart({ id: item.id, title: item.title, price: typeof item.price === 'number' ? item.price : parseInt(String(item.price).replace(/[^\d]/g, '')) })}>Add</Button>
                   </div>
                 </div>
               </div>

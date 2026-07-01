@@ -8,32 +8,11 @@ import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import api from "@/lib/api";
 
-// In a real app, this would be fetched from the backend based on params.id
-const productData = {
-  id: "1",
-  title: "Wireless Noise-Cancelling Headphones",
-  price: 24999,
-  originalPrice: 29999,
-  rating: 4.8,
-  reviews: 1240,
-  description: "Experience industry-leading noise cancellation and breathtaking sound quality. These over-ear headphones offer 30 hours of battery life and extreme comfort for all-day listening.",
-  features: [
-    "Industry-leading noise cancellation",
-    "30-hour battery life with quick charging",
-    "Touch sensor controls to pause/play/skip tracks",
-    "Speak-to-chat technology automatically reduces volume during conversations",
-    "Multipoint connection allows you to pair two Bluetooth devices at the same time"
-  ],
-  images: [
-    "https://via.placeholder.com/600",
-    "https://via.placeholder.com/600/111",
-    "https://via.placeholder.com/600/333",
-    "https://via.placeholder.com/600/555"
-  ]
-};
+import { getProductById } from "@/lib/mockData";
 
 export default function ProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const productData = getProductById(id);
   const [activeImage, setActiveImage] = useState(0);
   const { addToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
@@ -60,20 +39,16 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
         {/* Product Images */}
         <div className="w-full lg:w-1/2 flex flex-col gap-4">
           <div className="aspect-square rounded-2xl bg-muted border overflow-hidden flex items-center justify-center relative">
-             <ShoppingCart className="w-32 h-32 text-muted-foreground/20 absolute" />
-             {/* Fallback image */}
-             <div className="absolute inset-0 bg-primary/5 flex items-center justify-center font-bold text-2xl text-primary/30">
-               Product Image {activeImage + 1}
-             </div>
+             <img src={productData.images[activeImage]} alt={productData.title} className="w-full h-full object-cover" />
           </div>
           <div className="flex gap-4 overflow-x-auto pb-2">
-            {productData.images.map((_, i) => (
+            {productData.images.map((img, i) => (
               <button 
                 key={i} 
                 onClick={() => setActiveImage(i)}
-                className={`w-20 h-20 rounded-xl bg-muted border-2 flex-shrink-0 flex items-center justify-center transition-all ${activeImage === i ? 'border-primary' : 'border-transparent'}`}
+                className={`w-20 h-20 rounded-xl bg-muted border-2 flex-shrink-0 flex items-center justify-center overflow-hidden transition-all ${activeImage === i ? 'border-primary' : 'border-transparent'}`}
               >
-                <span className="text-xs text-muted-foreground">Img {i + 1}</span>
+                <img src={img} alt={`Thumbnail ${i + 1}`} className="w-full h-full object-cover" />
               </button>
             ))}
           </div>
@@ -162,14 +137,20 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
       <div className="mt-20">
         <h2 className="text-2xl font-bold mb-6">Relevant Products</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          {[1, 2, 3, 4, 5].map((i) => (
+          {[
+            { img: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=400&auto=format&fit=crop", name: "Premium Watch" },
+            { img: "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?q=80&w=400&auto=format&fit=crop", name: "Camera Lens" },
+            { img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=400&auto=format&fit=crop", name: "Running Shoes" },
+            { img: "https://images.unsplash.com/photo-1572569531935-c2eec7ebcc79?q=80&w=400&auto=format&fit=crop", name: "Travel Backpack" },
+            { img: "https://images.unsplash.com/photo-1585386959920-141b015f8342?q=80&w=400&auto=format&fit=crop", name: "Smartphone Case" }
+          ].map((item, i) => (
             <Link key={i} href={`/product/${i + 10}`} className="group relative flex flex-col rounded-xl border bg-card text-card-foreground shadow-sm overflow-hidden hover:shadow-lg transition-all">
               <div className="aspect-square bg-muted/50 relative overflow-hidden flex items-center justify-center">
                 <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10" />
-                <ShoppingCart className="h-10 w-10 text-muted-foreground/30" />
+                <img src={item.img} alt={item.name} className="w-full h-full object-cover" />
               </div>
               <div className="p-4 flex flex-col gap-2">
-                <h3 className="font-semibold text-sm line-clamp-1 group-hover:text-primary transition-colors">Similar Headphone {i}</h3>
+                <h3 className="font-semibold text-sm line-clamp-1 group-hover:text-primary transition-colors">{item.name}</h3>
                 <div className="flex items-center justify-between mt-1">
                   <span className="font-bold text-sm">₹{(i * 1000 + 15000).toLocaleString('en-IN')}</span>
                   <div className="flex items-center gap-1 text-[10px]">
