@@ -8,6 +8,15 @@ import mongoose from 'mongoose';
 // @access  Public
 export const getProducts = async (req: Request, res: Response): Promise<void> => {
   try {
+    if (mongoose.connection.readyState !== 1) {
+      const mockProducts = [
+        { _id: '1', title: 'iPhone 15 Pro', description: 'Latest Apple iPhone with A17 Pro chip.', basePrice: 134900, discountPrice: 129900, images: ['https://m.media-amazon.com/images/I/81+GIkwqLIL._SX679_.jpg'], rating: 4.8 },
+        { _id: '2', title: 'Sony WH-1000XM5', description: 'Industry leading noise canceling headphones.', basePrice: 29990, discountPrice: 24990, images: ['https://m.media-amazon.com/images/I/61vJtKbAssL._SX522_.jpg'], rating: 4.6 },
+        { _id: '3', title: 'Samsung Galaxy S24 Ultra', description: 'AI powered smartphone with S-Pen.', basePrice: 129999, discountPrice: 124999, images: ['https://m.media-amazon.com/images/I/71CXhVhpM0L._SX679_.jpg'], rating: 4.7 }
+      ];
+      res.status(200).json({ success: true, count: mockProducts.length, pagination: {}, products: mockProducts, message: 'Database disconnected - returning mock data' });
+      return;
+    }
     const { keyword, category, brand, minPrice, maxPrice, minRating, page, limit, sort } = req.query;
 
     const query: any = { isActive: true };
@@ -188,6 +197,16 @@ export const updateInventory = async (req: Request, res: Response): Promise<void
 // @access  Private
 export const getSuggestions = async (req: Request, res: Response) => {
   try {
+    if (mongoose.connection.readyState !== 1) {
+      const mockSuggestions = [
+        { _id: '1', title: 'iPhone 15 Pro', description: 'Latest Apple iPhone with A17 Pro chip.', basePrice: 134900, discountPrice: 129900, images: ['https://m.media-amazon.com/images/I/81+GIkwqLIL._SX679_.jpg'], rating: 4.8 },
+        { _id: '2', title: 'Sony WH-1000XM5', description: 'Industry leading noise canceling headphones.', basePrice: 29990, discountPrice: 24990, images: ['https://m.media-amazon.com/images/I/61vJtKbAssL._SX522_.jpg'], rating: 4.6 },
+        { _id: '3', title: 'Samsung Galaxy S24 Ultra', description: 'AI powered smartphone with S-Pen.', basePrice: 129999, discountPrice: 124999, images: ['https://m.media-amazon.com/images/I/71CXhVhpM0L._SX679_.jpg'], rating: 4.7 }
+      ];
+      res.status(200).json({ success: true, count: mockSuggestions.length, data: mockSuggestions, message: 'Database disconnected - returning mock suggestions' });
+      return;
+    }
+
     const user = (req as any).user ? await User.findById((req as any).user.id).populate('viewedProducts') : null;
 
     const query: any = { isActive: true };
