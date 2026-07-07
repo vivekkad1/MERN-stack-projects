@@ -199,6 +199,64 @@ export const updateInventory = async (req: Request, res: Response): Promise<void
   }
 };
 
+// @desc    Get low stock products
+// @route   GET /api/products/inventory/low-stock
+// @access  Private (Seller/Admin)
+export const getLowStock = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userRole = (req as any).user.role;
+    let query: any = {};
+    
+    if (userRole === UserRole.SELLER) {
+      query.seller = (req as any).user._id;
+    }
+
+    // Find products where stock is less than or equal to lowStockThreshold
+    query.$expr = { $lte: ['$stock', '$lowStockThreshold'] };
+
+    const products = await Product.find(query).select('title stock lowStockThreshold warehouseLocation images variants');
+    
+    res.status(200).json({ success: true, count: products.length, data: products });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Bulk update inventory
+// @route   PUT /api/products/inventory/bulk-update
+// @access  Private (Seller/Admin)
+export const bulkUpdateInventory = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { updates } = req.body; // Array of { productId, stock }
+    const userRole = (req as any).user.role;
+    const userId = (req as any).user._id;
+
+    if (!Array.isArray(updates)) {
+      res.status(400).json({ success: false, message: 'Updates must be an array' });
+      return;
+    }
+
+    const updatedProducts = [];
+
+    for (const update of updates) {
+      const product = await Product.findById(update.productId);
+      if (product) {
+        // Sellers can only update their own products
+        if (userRole === UserRole.SELLER && product.seller.toString() !== userId.toString()) {
+          continue;
+        }
+        product.stock = update.stock;
+        await product.save();
+        updatedProducts.push(product);
+      }
+    }
+
+    res.status(200).json({ success: true, count: updatedProducts.length, message: 'Bulk update successful' });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 // @desc    Get personalized product suggestions
 // @route   GET /api/products/suggestions
 // @access  Private

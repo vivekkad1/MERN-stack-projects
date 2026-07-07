@@ -4,7 +4,7 @@ import { LayoutDashboard, Users, Package, ShoppingCart, Settings } from 'lucide-
 import { cn } from '@/lib/utils';
 
 interface SidebarProps {
-  role: 'admin' | 'seller';
+  role: 'admin' | 'seller' | 'delivery_partner';
 }
 
 export function Sidebar({ role }: SidebarProps) {
@@ -15,15 +15,22 @@ export function Sidebar({ role }: SidebarProps) {
     { href: '/admin/users', label: 'Users', icon: Users },
     { href: '/admin/products', label: 'Products', icon: Package },
     { href: '/admin/orders', label: 'Orders', icon: ShoppingCart },
+    { href: '/admin/inventory', label: 'Inventory', icon: Package },
+    { href: '/admin/support', label: 'Support', icon: Users },
   ];
 
   const sellerLinks = [
     { href: '/seller/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/seller/dashboard/products', label: 'My Products', icon: Package },
     { href: '/seller/dashboard/orders', label: 'Orders', icon: ShoppingCart },
+    { href: '/seller/dashboard/inventory', label: 'Inventory', icon: Package },
   ];
 
-  const links = role === 'admin' ? adminLinks : sellerLinks;
+  const deliveryLinks = [
+    { href: '/delivery/dashboard', label: 'My Deliveries', icon: Package },
+  ];
+
+  const links = role === 'admin' ? adminLinks : role === 'seller' ? sellerLinks : deliveryLinks;
 
   return (
     <aside className="w-64 bg-card border-r min-h-[calc(100vh-64px)] hidden md:block">

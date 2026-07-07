@@ -37,7 +37,9 @@ export interface IOrder extends Document {
   paidAt?: Date;
   isDelivered: boolean;
   deliveredAt?: Date;
-  status: 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
+  status: 'Pending' | 'Processing' | 'Shipped' | 'Out for Delivery' | 'Attempted' | 'Delivered' | 'Cancelled';
+  deliveryPartner?: mongoose.Types.ObjectId;
+  proofOfDelivery?: string;
 }
 
 const OrderItemSchema = new Schema<IOrderItem>({
@@ -130,8 +132,15 @@ const OrderSchema = new Schema<IOrder>(
     },
     status: {
       type: String,
-      enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'],
+      enum: ['Pending', 'Processing', 'Shipped', 'Out for Delivery', 'Attempted', 'Delivered', 'Cancelled'],
       default: 'Pending'
+    },
+    deliveryPartner: {
+      type: Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    proofOfDelivery: {
+      type: String
     }
   },
   { timestamps: true }

@@ -27,6 +27,8 @@ export interface IProduct extends Document {
   rating: number;
   numReviews: number;
   isActive: boolean;
+  lowStockThreshold: number;
+  warehouseLocation?: string;
 }
 
 const variantSchema = new Schema<IVariant>({
@@ -110,6 +112,14 @@ const productSchema = new Schema<IProduct>(
     isActive: {
       type: Boolean,
       default: true
+    },
+    lowStockThreshold: {
+      type: Number,
+      default: 10
+    },
+    warehouseLocation: {
+      type: String,
+      default: 'Main Warehouse'
     }
   },
   {

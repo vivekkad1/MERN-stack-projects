@@ -6,7 +6,9 @@ import {
   updateProduct,
   deleteProduct,
   updateInventory,
-  getSuggestions
+  getSuggestions,
+  getLowStock,
+  bulkUpdateInventory
 } from '../controllers/product.controller';
 import {
   createReview,
@@ -22,6 +24,10 @@ router.get('/', getProducts);
 
 // Protected suggestions route (must be before /:idOrSlug)
 router.get('/suggestions', optionalAuth, getSuggestions);
+
+// Inventory routes (must be before /:idOrSlug)
+router.get('/inventory/low-stock', protect, authorize(UserRole.SELLER, UserRole.ADMIN, UserRole.SUPER_ADMIN), getLowStock);
+router.put('/inventory/bulk-update', protect, authorize(UserRole.SELLER, UserRole.ADMIN, UserRole.SUPER_ADMIN), bulkUpdateInventory);
 
 router.get('/:idOrSlug', getProductById);
 router.get('/:productId/reviews', getProductReviews);

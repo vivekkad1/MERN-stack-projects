@@ -22,6 +22,8 @@ import chatRoutes from './routes/chat.routes';
 import uploadRoutes from './routes/upload.routes';
 import couponRoutes from './routes/coupon.routes';
 import returnRoutes from './routes/return.routes';
+import deliveryRoutes from './routes/delivery.routes';
+import ticketRoutes from './routes/ticket.routes';
 
 dotenv.config();
 
@@ -59,6 +61,8 @@ app.use('/api/chat', chatRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/coupons', couponRoutes);
 app.use('/api/returns', returnRoutes);
+app.use('/api/delivery', deliveryRoutes);
+app.use('/api/tickets', ticketRoutes);
 
 // Basic health check route
 app.get('/health', (req, res) => {
