@@ -28,6 +28,8 @@ export interface IOrder extends Document {
     update_time: string;
     email_address: string;
   };
+  couponCode?: string;
+  couponDiscount?: number;
   taxPrice: number;
   shippingPrice: number;
   totalPrice: number;
@@ -87,6 +89,13 @@ const OrderSchema = new Schema<IOrder>(
       status: { type: String },
       update_time: { type: String },
       email_address: { type: String },
+    },
+    couponCode: {
+      type: String,
+    },
+    couponDiscount: {
+      type: Number,
+      default: 0.0,
     },
     taxPrice: {
       type: Number,

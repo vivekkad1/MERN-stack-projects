@@ -33,6 +33,11 @@ export default function CheckoutPage() {
     phone: ""
   });
   const [paymentMethod, setPaymentMethod] = useState("Cash on Delivery");
+  
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
+  const [couponError, setCouponError] = useState("");
+  const [discountAmount, setDiscountAmount] = useState(0);
 
   useEffect(() => {
     // If cart is empty and not on success step, go to cart
@@ -66,7 +71,9 @@ export default function CheckoutPage() {
         itemsPrice: cartTotal,
         taxPrice: 0,
         shippingPrice: deliveryFee,
-        totalPrice: totalAmount
+        totalPrice: totalAmount,
+        couponCode: appliedCoupon?.code,
+        couponDiscount: discountAmount
       };
 
       if (paymentMethod === "Cash on Delivery") {
@@ -159,8 +166,23 @@ export default function CheckoutPage() {
     }
   };
 
+  const handleApplyCoupon = async () => {
+    try {
+      setCouponError("");
+      const res = await api.post('/coupons/apply', { code: couponCode, cartTotal });
+      if (res.data.success) {
+        setAppliedCoupon(res.data.data);
+        setDiscountAmount(res.data.data.discountAmount);
+      }
+    } catch (error: any) {
+      setCouponError(error.response?.data?.message || "Invalid coupon");
+      setAppliedCoupon(null);
+      setDiscountAmount(0);
+    }
+  };
+
   const deliveryFee = cartTotal > 500 || cartTotal === 0 ? 0 : 50;
-  const total = cartTotal + deliveryFee;
+  const total = cartTotal + deliveryFee - discountAmount;
 
   return (
     <div className="container mx-auto px-4 py-12 min-h-[80vh]">
@@ -303,6 +325,26 @@ export default function CheckoutPage() {
                      <span>Delivery:</span>
                      <span>{deliveryFee === 0 ? 'Free' : `₹${deliveryFee}`}</span>
                    </div>
+                   
+                   {/* Coupon Section */}
+                   <div className="pt-4 border-t">
+                     {!appliedCoupon ? (
+                       <div className="flex gap-2">
+                         <Input placeholder="Coupon Code" value={couponCode} onChange={(e) => setCouponCode(e.target.value)} />
+                         <Button variant="secondary" onClick={handleApplyCoupon}>Apply</Button>
+                       </div>
+                     ) : (
+                       <div className="flex justify-between items-center text-green-600 bg-green-50 p-2 rounded">
+                         <span>Coupon ({appliedCoupon.code})</span>
+                         <div className="flex items-center gap-2">
+                           <span>-₹{discountAmount.toLocaleString('en-IN')}</span>
+                           <button onClick={() => {setAppliedCoupon(null); setDiscountAmount(0); setCouponCode("");}} className="text-red-500 text-xs">Remove</button>
+                         </div>
+                       </div>
+                     )}
+                     {couponError && <p className="text-red-500 text-xs mt-1">{couponError}</p>}
+                   </div>
+
                    <div className="border-t pt-4 flex justify-between items-center text-lg font-bold">
                      <span>Total:</span>
                      <span className="text-primary">₹{total.toLocaleString('en-IN')}</span>

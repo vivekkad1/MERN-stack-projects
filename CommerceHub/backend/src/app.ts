@@ -20,6 +20,8 @@ import adminRoutes from './routes/admin.routes';
 import sellerRoutes from './routes/seller.routes';
 import chatRoutes from './routes/chat.routes';
 import uploadRoutes from './routes/upload.routes';
+import couponRoutes from './routes/coupon.routes';
+import returnRoutes from './routes/return.routes';
 
 dotenv.config();
 
@@ -55,6 +57,8 @@ app.use('/api/seller', sellerRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/coupons', couponRoutes);
+app.use('/api/returns', returnRoutes);
 
 // Basic health check route
 app.get('/health', (req, res) => {
