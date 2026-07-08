@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { User, Package, Settings, CreditCard, LogOut, Heart, Moon, Sun, Monitor, Loader2, Calendar, MapPin, Trash2 } from "lucide-react";
+import { User, Package, Settings, CreditCard, LogOut, Heart, Moon, Sun, Monitor, Loader2, Calendar, MapPin, Trash2, ArrowLeftRight, LifeBuoy } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -400,6 +400,20 @@ function ProfileContent() {
             onClick={() => setActiveTab("settings")}
           >
             <Settings className="h-5 w-5" /> Settings
+          </Button>
+          <Button 
+            variant="ghost" 
+            className="justify-start gap-3 h-12 text-base"
+            onClick={() => window.location.href = "/profile/returns"}
+          >
+            <ArrowLeftRight className="h-5 w-5" /> Returns
+          </Button>
+          <Button 
+            variant="ghost" 
+            className="justify-start gap-3 h-12 text-base"
+            onClick={() => window.location.href = "/profile/support"}
+          >
+            <LifeBuoy className="h-5 w-5" /> Support Tickets
           </Button>
           <div className="mt-8 pt-4 border-t">
             <Button variant="ghost" className="justify-start gap-3 h-12 text-base text-destructive hover:text-destructive hover:bg-destructive/10 w-full" onClick={() => alert("Sign Out coming soon!")}>

@@ -24,6 +24,7 @@ import couponRoutes from './routes/coupon.routes';
 import returnRoutes from './routes/return.routes';
 import deliveryRoutes from './routes/delivery.routes';
 import ticketRoutes from './routes/ticket.routes';
+import adminFeaturesRoutes from './routes/admin.features.routes';
 
 dotenv.config();
 
@@ -63,6 +64,7 @@ app.use('/api/coupons', couponRoutes);
 app.use('/api/returns', returnRoutes);
 app.use('/api/delivery', deliveryRoutes);
 app.use('/api/tickets', ticketRoutes);
+app.use('/api/admin/features', adminFeaturesRoutes);
 
 // Basic health check route
 app.get('/health', (req, res) => {

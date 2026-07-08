@@ -17,6 +17,8 @@ export function Sidebar({ role }: SidebarProps) {
     { href: '/admin/orders', label: 'Orders', icon: ShoppingCart },
     { href: '/admin/inventory', label: 'Inventory', icon: Package },
     { href: '/admin/support', label: 'Support', icon: Users },
+    { href: '/admin/audit-logs', label: 'Audit Logs', icon: Settings },
+    { href: '/admin/settings', label: 'Settings', icon: Settings },
   ];
 
   const sellerLinks = [
