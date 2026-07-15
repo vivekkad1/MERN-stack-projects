@@ -81,12 +81,10 @@ const couponSchema = new Schema<ICoupon>(
   }
 );
 
-// Pre-save to uppercase code
-couponSchema.pre('save', function (next) {
+couponSchema.pre('save', async function () {
   if (this.code) {
     this.code = this.code.toUpperCase();
   }
-  next();
 });
 
 export const Coupon = mongoose.model<ICoupon>('Coupon', couponSchema);

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import api from '@/lib/api';
-import { Button } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button';
 import { PackageX, Plus } from 'lucide-react';
 import Link from 'next/link';
 
@@ -33,11 +33,9 @@ export default function SellerProductsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold tracking-tight">My Products</h1>
-        <Button className="gap-2" asChild>
-          <Link href="/seller/dashboard/products/new">
-            <Plus className="w-4 h-4" /> Add Product
-          </Link>
-        </Button>
+        <Link href="/seller/dashboard/products/new" className={buttonVariants({ className: "gap-2" })}>
+          <Plus className="w-4 h-4" /> Add Product
+        </Link>
       </div>
 
       <div className="rounded-xl border bg-card overflow-hidden shadow-sm">
@@ -79,9 +77,9 @@ export default function SellerProductsPage() {
                   <td className="px-6 py-4 font-medium">₹{product.basePrice}</td>
                   <td className="px-6 py-4">{product.stock}</td>
                   <td className="px-6 py-4 text-right">
-                    <Button size="sm" variant="outline" asChild>
-                      <Link href={`/product/${product._id}`}>View</Link>
-                    </Button>
+                    <Link href={`/product/${product._id}`} className={buttonVariants({ size: "sm", variant: "outline" })}>
+                      View
+                    </Link>
                   </td>
                 </tr>
               ))}

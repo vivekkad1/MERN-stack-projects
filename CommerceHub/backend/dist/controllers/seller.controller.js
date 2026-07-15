@@ -1,0 +1,91 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getSellerProducts = exports.getSellerOrders = exports.getSellerStats = void 0;
+const Product_1 = require("../models/Product");
+const Order_1 = require("../models/Order");
+// @desc    Get Seller Dashboard Stats
+// @route   GET /api/seller/stats
+// @access  Private/Seller
+const getSellerStats = async (req, res) => {
+    try {
+        const sellerId = req.user._id;
+        // 1. Get all products owned by seller
+        const products = await Product_1.Product.find({ seller: sellerId });
+        const productIds = products.map(p => p._id);
+        // 2. Count active products
+        const totalProducts = products.length;
+        // 3. Find all orders containing these products
+        const orders = await Order_1.Order.find({ 'orderItems.product': { $in: productIds } });
+        // 4. Calculate total revenue and pending orders specifically for this seller's items
+        let totalRevenue = 0;
+        let pendingOrders = 0;
+        orders.forEach(order => {
+            if (order.status === 'Pending' || order.status === 'Processing') {
+                pendingOrders++;
+            }
+            if (order.isPaid) {
+                order.orderItems.forEach(item => {
+                    if (productIds.some(id => id.equals(item.product))) {
+                        totalRevenue += (item.price * item.quantity);
+                    }
+                });
+            }
+        });
+        res.status(200).json({
+            success: true,
+            data: {
+                totalProducts,
+                totalOrders: orders.length,
+                totalRevenue,
+                pendingOrders,
+                recentOrders: orders.slice(0, 5) // Send 5 most recent
+            }
+        });
+    }
+    catch (error) {
+        res.status(500).json({ success: false, message: 'Server Error', error });
+    }
+};
+exports.getSellerStats = getSellerStats;
+// @desc    Get all orders for a seller's products
+// @route   GET /api/seller/orders
+// @access  Private/Seller
+const getSellerOrders = async (req, res) => {
+    try {
+        const sellerId = req.user._id;
+        const products = await Product_1.Product.find({ seller: sellerId }).select('_id');
+        const productIds = products.map(p => p._id);
+        const orders = await Order_1.Order.find({ 'orderItems.product': { $in: productIds } })
+            .populate('user', 'name email')
+            .sort({ createdAt: -1 });
+        res.status(200).json({
+            success: true,
+            count: orders.length,
+            data: orders
+        });
+    }
+    catch (error) {
+        res.status(500).json({ success: false, message: 'Server Error', error });
+    }
+};
+exports.getSellerOrders = getSellerOrders;
+// @desc    Get all products for a seller
+// @route   GET /api/seller/products
+// @access  Private/Seller
+const getSellerProducts = async (req, res) => {
+    try {
+        const sellerId = req.user._id;
+        const products = await Product_1.Product.find({ seller: sellerId })
+            .populate('category', 'name')
+            .sort({ createdAt: -1 });
+        res.status(200).json({
+            success: true,
+            count: products.length,
+            data: products
+        });
+    }
+    catch (error) {
+        res.status(500).json({ success: false, message: 'Server Error', error });
+    }
+};
+exports.getSellerProducts = getSellerProducts;
