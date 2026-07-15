@@ -23,7 +23,11 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     if (inWishlist) {
       removeFromWishlist(id);
     } else {
-      addToWishlist(id);
+      addToWishlist(id, { 
+        name: productData.title, 
+        price: productData.price, 
+        images: productData.images 
+      });
     }
   };
 

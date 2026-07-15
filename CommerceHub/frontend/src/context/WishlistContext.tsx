@@ -12,7 +12,7 @@ export type WishlistItem = {
 
 interface WishlistContextType {
   wishlistItems: WishlistItem[];
-  addToWishlist: (productId: string) => Promise<void>;
+  addToWishlist: (productId: string, itemData?: Omit<WishlistItem, '_id'>) => Promise<void>;
   removeFromWishlist: (productId: string) => Promise<void>;
   isInWishlist: (productId: string) => boolean;
   isLoading: boolean;
@@ -23,14 +23,21 @@ const WishlistContext = createContext<WishlistContextType | undefined>(undefined
 export function WishlistProvider({ children }: { children: ReactNode }) {
   const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   const fetchWishlist = useCallback(async () => {
-    if (typeof window !== 'undefined') {
-      const userInfo = localStorage.getItem('minikart_user');
-      if (!userInfo) {
-        setIsLoading(false);
-        return;
+    const isAuthenticated = typeof window !== 'undefined' && localStorage.getItem('minikart_user');
+    
+    if (!isAuthenticated) {
+      const saved = typeof window !== 'undefined' ? localStorage.getItem("minikart_wishlist") : null;
+      if (saved) {
+        try {
+          setWishlistItems(JSON.parse(saved));
+        } catch(e) {}
       }
+      setIsLoading(false);
+      setIsLoaded(true);
+      return;
     }
     
     try {
@@ -42,40 +49,65 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
       console.error("Failed to fetch wishlist:", error);
     } finally {
       setIsLoading(false);
+      setIsLoaded(true);
     }
   }, []);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchWishlist();
   }, [fetchWishlist]);
 
-  const addToWishlist = async (productId: string) => {
-    try {
-      const res = await api.post(`/wishlist/${productId}`);
-      if (res.data.success) {
-        setWishlistItems(res.data.data);
+  useEffect(() => {
+    const isAuthenticated = typeof window !== 'undefined' && localStorage.getItem('minikart_user');
+    if (isLoaded && (!isAuthenticated || wishlistItems.some(i => i._id.length < 10))) {
+      localStorage.setItem("minikart_wishlist", JSON.stringify(wishlistItems));
+    }
+  }, [wishlistItems, isLoaded]);
+
+  const addToWishlist = async (productId: string, itemData?: Omit<WishlistItem, '_id'>) => {
+    const isAuthenticated = typeof window !== 'undefined' && localStorage.getItem('minikart_user');
+    
+    if (isAuthenticated) {
+      try {
+        const res = await api.post(`/wishlist/${productId}`);
+        if (res.data.success) {
+          setWishlistItems(res.data.data);
+        }
+      } catch (error: any) {
+        console.error("Failed to add to wishlist:", error);
+        // Fallback for dummy products even when authenticated
+        if (error.response?.status === 404 && itemData) {
+          setWishlistItems(prev => {
+            if (prev.some(item => item._id === productId)) return prev;
+            return [...prev, { _id: productId, ...itemData }];
+          });
+        } else {
+          alert("Failed to add to wishlist. Is the server running?");
+        }
       }
-    } catch (error: any) {
-      console.error("Failed to add to wishlist:", error);
-      if (error.response?.status === 401 || error.response?.status === 403) {
-        alert("Please login to add items to wishlist");
-      } else if (error.response?.status === 404) {
-        alert("Product not found in database (Dummy products cannot be added)");
-      } else {
-        alert("Failed to add to wishlist. Is the server running?");
-      }
+    } else {
+      setWishlistItems(prev => {
+        if (prev.some(item => item._id === productId)) return prev;
+        return [...prev, { _id: productId, name: itemData?.name || 'Product', price: itemData?.price || 0, images: itemData?.images || [] }];
+      });
     }
   };
 
   const removeFromWishlist = async (productId: string) => {
-    try {
-      const res = await api.delete(`/wishlist/${productId}`);
-      if (res.data.success) {
-        setWishlistItems(res.data.data);
+    const isAuthenticated = typeof window !== 'undefined' && localStorage.getItem('minikart_user');
+    
+    if (isAuthenticated) {
+      try {
+        const res = await api.delete(`/wishlist/${productId}`);
+        if (res.data.success) {
+          setWishlistItems(res.data.data);
+        }
+      } catch (error: any) {
+        // Fallback for removing dummy products
+        setWishlistItems(prev => prev.filter(item => item._id !== productId));
       }
-    } catch (error) {
-      console.error("Failed to remove from wishlist:", error);
+    } else {
+      setWishlistItems(prev => prev.filter(item => item._id !== productId));
     }
   };
 
