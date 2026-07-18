@@ -19,11 +19,7 @@ export default function AdminCouponsPage() {
     usageLimit: 1
   });
 
-  useEffect(() => {
-    fetchCoupons();
-  }, []);
-
-  const fetchCoupons = async () => {
+async function fetchCoupons() {
     try {
       const res = await api.get('/coupons');
       if (res.data.success) {
@@ -34,7 +30,13 @@ export default function AdminCouponsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }
+
+  useEffect(() => {
+    fetchCoupons();
+  }, []);
+
+  
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();

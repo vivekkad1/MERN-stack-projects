@@ -9,11 +9,7 @@ export default function SellerReturnsPage() {
   const [returns, setReturns] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchReturns();
-  }, []);
-
-  const fetchReturns = async () => {
+  async function fetchReturns() {
     try {
       const res = await api.get('/returns');
       if (res.data.success) {
@@ -24,7 +20,11 @@ export default function SellerReturnsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }
+
+  useEffect(() => {
+    fetchReturns();
+  }, []);
 
   const handleStatusChange = async (id: string, status: string) => {
     try {

@@ -16,7 +16,7 @@ export default function Home() {
   const [suggestions, setSuggestions] = useState<any[]>([]);
 
   useEffect(() => {
-    const fetchSuggestions = async () => {
+    async function fetchSuggestions() {
       try {
         const res = await api.get('/products/suggestions');
         if (res.data.success) {

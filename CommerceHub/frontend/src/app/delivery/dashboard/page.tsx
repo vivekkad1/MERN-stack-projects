@@ -10,11 +10,7 @@ export default function DeliveryDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [proofUrl, setProofUrl] = useState('');
 
-  useEffect(() => {
-    fetchAssignments();
-  }, []);
-
-  const fetchAssignments = async () => {
+async function fetchAssignments() {
     try {
       const res = await api.get('/delivery/assignments');
       if (res.data.success) {
@@ -25,7 +21,13 @@ export default function DeliveryDashboardPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }
+
+  useEffect(() => {
+    fetchAssignments();
+  }, []);
+
+  
 
   const handleStatusChange = async (id: string, status: string) => {
     try {

@@ -14,11 +14,7 @@ export default function AdminSettingsPage() {
   const [newName, setNewName] = useState('');
   const [newDesc, setNewDesc] = useState('');
 
-  useEffect(() => {
-    fetchFlags();
-  }, []);
-
-  const fetchFlags = async () => {
+async function fetchFlags() {
     try {
       setLoading(true);
       const res = await api.get('/admin/features/feature-flags');
@@ -30,7 +26,13 @@ export default function AdminSettingsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }
+
+  useEffect(() => {
+    fetchFlags();
+  }, []);
+
+  
 
   const handleToggle = async (id: string, currentStatus: boolean) => {
     try {

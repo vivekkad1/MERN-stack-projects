@@ -9,11 +9,7 @@ export default function AdminUsersPage() {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
-  const fetchUsers = async () => {
+async function fetchUsers() {
     try {
       const res = await api.get('/admin/users');
       if (res.data.success) {
@@ -24,7 +20,13 @@ export default function AdminUsersPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  
 
   const handleRoleChange = async (userId: string, newRole: string) => {
     try {

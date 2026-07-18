@@ -16,11 +16,7 @@ export default function AdminSupportPage() {
   const [selectedTicket, setSelectedTicket] = useState<any>(null);
   const [replyMessage, setReplyMessage] = useState('');
 
-  useEffect(() => {
-    fetchTickets();
-  }, []);
-
-  const fetchTickets = async () => {
+async function fetchTickets() {
     try {
       setLoading(true);
       const res = await api.get('/tickets');
@@ -32,7 +28,13 @@ export default function AdminSupportPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }
+
+  useEffect(() => {
+    fetchTickets();
+  }, []);
+
+  
 
   const fetchTicketDetails = async (id: string) => {
     try {

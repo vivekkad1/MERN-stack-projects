@@ -22,11 +22,7 @@ export default function CustomerSupportPage() {
   const [selectedTicket, setSelectedTicket] = useState<any>(null);
   const [replyMessage, setReplyMessage] = useState('');
 
-  useEffect(() => {
-    fetchTickets();
-  }, []);
-
-  const fetchTickets = async () => {
+async function fetchTickets() {
     try {
       setLoading(true);
       const res = await api.get('/tickets/my-tickets');
@@ -38,7 +34,13 @@ export default function CustomerSupportPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }
+
+  useEffect(() => {
+    fetchTickets();
+  }, []);
+
+  
 
   const fetchTicketDetails = async (id: string) => {
     try {

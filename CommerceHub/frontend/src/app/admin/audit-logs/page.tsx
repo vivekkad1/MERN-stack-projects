@@ -8,11 +8,7 @@ export default function AuditLogsPage() {
   const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchLogs();
-  }, []);
-
-  const fetchLogs = async () => {
+async function fetchLogs() {
     try {
       const res = await api.get('/admin/features/audit-logs');
       if (res.data.success) {
@@ -23,7 +19,13 @@ export default function AuditLogsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }
+
+  useEffect(() => {
+    fetchLogs();
+  }, []);
+
+  
 
   if (loading) return <div className="animate-pulse h-96 bg-muted rounded-xl" />;
 

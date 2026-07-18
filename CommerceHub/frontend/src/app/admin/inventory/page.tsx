@@ -11,11 +11,7 @@ export default function SellerInventoryPage() {
   const [loading, setLoading] = useState(true);
   const [updates, setUpdates] = useState<{[key: string]: number}>({});
 
-  useEffect(() => {
-    fetchLowStock();
-  }, []);
-
-  const fetchLowStock = async () => {
+async function fetchLowStock() {
     try {
       setLoading(true);
       const res = await api.get('/products/inventory/low-stock');
@@ -27,7 +23,13 @@ export default function SellerInventoryPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }
+
+  useEffect(() => {
+    fetchLowStock();
+  }, []);
+
+  
 
   const handleStockChange = (productId: string, newStock: string) => {
     setUpdates(prev => ({

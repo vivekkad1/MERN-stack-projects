@@ -9,11 +9,7 @@ export default function AdminProductsPage() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  const fetchProducts = async () => {
+async function fetchProducts() {
     try {
       // Reusing the public product endpoint since Admin just needs to see them
       const res = await api.get('/products?limit=100'); 
@@ -25,7 +21,13 @@ export default function AdminProductsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this product?")) return;

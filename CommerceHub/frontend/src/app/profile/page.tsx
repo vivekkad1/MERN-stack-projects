@@ -41,7 +41,7 @@ function ProfileContent() {
     setMounted(true);
   }, []);
 
-  const fetchOrders = async () => {
+  async function fetchOrders() {
     setLoadingOrders(true);
     try {
       const res = await api.get('/orders/myorders');

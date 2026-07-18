@@ -10,11 +10,7 @@ export default function CustomerReturnsPage() {
   const [returns, setReturns] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchMyReturns();
-  }, []);
-
-  const fetchMyReturns = async () => {
+async function fetchMyReturns() {
     try {
       const res = await api.get('/returns/myreturns');
       if (res.data.success) {
@@ -25,7 +21,13 @@ export default function CustomerReturnsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }
+
+  useEffect(() => {
+    fetchMyReturns();
+  }, []);
+
+  
 
   if (loading) return <div className="animate-pulse h-64 bg-muted rounded-xl" />;
 

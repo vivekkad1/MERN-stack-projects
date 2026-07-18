@@ -7,11 +7,7 @@ export default function SellerOrdersPage() {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchOrders();
-  }, []);
-
-  const fetchOrders = async () => {
+  async function fetchOrders() {
     try {
       const res = await api.get('/seller/orders');
       if (res.data.success) {
@@ -22,7 +18,11 @@ export default function SellerOrdersPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }
+
+  useEffect(() => {
+    fetchOrders();
+  }, []);
 
   if (loading) return <div className="animate-pulse h-96 bg-muted rounded-xl" />;
 
