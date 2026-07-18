@@ -4,6 +4,8 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from './config/swagger';
 
 import authRoutes from './routes/auth.routes';
 import cartRoutes from './routes/cart.routes';
@@ -65,6 +67,9 @@ app.use('/api/returns', returnRoutes);
 app.use('/api/delivery', deliveryRoutes);
 app.use('/api/tickets', ticketRoutes);
 app.use('/api/admin/features', adminFeaturesRoutes);
+
+// Swagger Documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Basic health check route
 app.get('/health', (req, res) => {
